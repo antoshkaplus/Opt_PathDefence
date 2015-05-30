@@ -42,16 +42,22 @@ endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
 
 include_directories("/usr/local/include")
 include_directories("/usr/include")
+include_directories("./include")
 
 find_library(ANT_LIBRARY ant)
 if (NOT ANT_LIBRARY) 
     message(FATAL_ERROR "ant library not found")    
 endif()
 
-
 file(GLOB PATH_DEFENCE_FILES "./src/*")
-add_executable(path_defence ${PATH_DEFENCE_FILES})
+add_library(path_defence ${PATH_DEFENCE_FILES})
 target_link_libraries(path_defence ${ANT_LIBRARY})
+
+add_executable(path_defence_offline "./app/offline.cpp")
+target_link_libraries(path_defence_offline path_defence)
+
+add_executable(path_defence_online "./app/online.cpp")
+target_link_libraries(path_defence_online path_defence)
 
 
 
