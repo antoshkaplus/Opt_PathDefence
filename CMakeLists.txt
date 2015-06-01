@@ -49,7 +49,7 @@ if (NOT ANT_LIBRARY)
     message(FATAL_ERROR "ant library not found")    
 endif()
 
-file(GLOB PATH_DEFENCE_FILES "./src/*")
+file(GLOB PATH_DEFENCE_FILES "./src/*" "./include/*")
 add_library(path_defence ${PATH_DEFENCE_FILES})
 target_link_libraries(path_defence ${ANT_LIBRARY})
 

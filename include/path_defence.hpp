@@ -9,48 +9,8 @@
 #ifndef PathDefence_path_defence_hpp
 #define PathDefence_path_defence_hpp
 
-
-#include <iostream>
-#include <fstream>
-#include <array>
-#include <queue>
-
-
-#include "ant/core/core.hpp"
-#include "ant/geometry/d2.h"
-#include "ant/grid.h"
-
-
-using namespace std;
-using namespace ant;
-using namespace ant::grid;
-
-struct Creep {
-    Index id, hp, r, c;
-    Creep() {}
-    Creep(Index id, Count hp, Index r, Index c)
-    : id(id), hp(hp), r(r), c(c) {}
-    
-    
-};
-
-struct Tower {
-    // range
-    Count rng; 
-    Count dmg;
-    Count cost;
-    
-    Tower(Count rng, Count dmg, Count cost) 
-    : rng(rng), dmg(dmg), cost(cost) {}
-};
-
-struct TowerPosition {
-    Index tower;
-    Position position;
-    
-    TowerPosition(Index tower, Position position) 
-        : tower(tower), position(position) {}
-};
+#include "util.hpp"
+#include "simulator.hpp"
 
 struct Score {
     double count;
@@ -64,15 +24,8 @@ struct Score {
 
 class PathDefense {
 private:
-    // after we place a tower we will add "*" in that place
-    // '.' - path
-    // '#' - tower
-    constexpr static Count MAX_CREEP_COUNT = 2000;
-    constexpr static Count TICK_COUNT = 2000;
-    constexpr static Count HP_INCREASE_PERIOD = 500;
-    constexpr static Count MAX_BASE_COUNT = 8;
-    
-    Count N;
+   
+        Count N;
     vector<Position> base_positions_;
     vector<vector<Position>> creep_positions_;
     vector<bool> creep_discarded_;
