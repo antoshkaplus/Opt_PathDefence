@@ -9,128 +9,32 @@
 #ifndef PathDefence_simulator_hpp
 #define PathDefence_simulator_hpp
 
-#include "ant/graph/graph.hpp"
+#include <unordered_map>
 
-using namespace ant::graph;
-
-class Board {
-    
-    // can have actual pointers instead of Positon
-    // against memory segmentation
-    // Grid<map<Index, Index>> some;
-public:    
-    // locs, paths, where to go next 
-    vector<map<Index, Index>> some;
-
-
-    Board() {}
-    
-    Board(vector<string>& b) {
-        Count N = b.size();
-        Grid<Index> gg;
-        // could use iterator and std method
-        gg.fill(-1);
-        Count locs = 0;
-        for (int r = 0; r < N; ++r) {
-            for (int c = 0; c < N; ++c) {
-                if (b[r][c] == CELL_ROAD) {
-                    gg(r, c) = locs++;
-                }
-            }
-        }
-        NodeAdjacencyList adj(locs); 
-        for (int r = 0; r < N; ++r) {
-            for (int c = 0; c < N; ++c) {
-                if (b[r][c] == CELL_ROAD) {
-                    if (r > 0) {
-                        if (b[r-1][c] == CELL_ROAD || b[r-1][c] == CELL_BASE) {
-                            adj[gg(r, c)].push_back(gg(r-1, c));
-                        }
-                    }
-                    if (c > 0) {
-                        // same here
-                    }
-                    if (r != N-1) {
-                    
-                    }
-                    if (c != N-1) {
-                    
-                    }
-                }
-            }
-        }
-        // run for each spawn location
-        Index v;
-        // assign minimum that is around? ? ? 
-        vector<Count> time(locs);
-        for (int i = 0; i < spawn_loc_count(); ++i) {
-            fill(time.begin(), time.end(), 0);
-            Index b;
-            auto proc = [&](Index v, Index prev) {
-                time[v] = time[prev]+1;
-                if (IsBaseNearby(v)) {
-                    b = v;
-                    return BFS_Flow::Terminate;
-                }
-                return BFS_Flow::Continue; 
-            };
-            BFS_Prev(CreateGraph(adj), v, proc);
-            auto SmallestNeighbor = [] (Index i) {
-                return 0;
-            };
-            
-            // now from base we go and initialize
-            // -1 means base 
-            some[b][i] = -1;
-            while (true) {
-                Index n = SmallestNeighbor(b);
-                some[n][i] = b;
-                if (n == v) break;
-                b = n;
-            }
-        }
-        // now what happens if we there is no such path
-    
-    }
-    
-    
-    
-    
-    bool IsBase(Index t) { 
-        return true;
-    }
-    
-    bool IsBaseNearby(Index t) {
-        return true;
-    }
-    
-    Count spawn_loc_count() const {
-    
-    }
-    
-    Index spawn_loc(const Position& pos) const {
-    
-    }
-    
-    void ComputeInitialRoutes() {
-        
-    
-    
-    }
-    
-};
+#include "board.hpp"
 
 
 
 class Simulator {
 public:
     
-    Board board;
+    struct CreepInfo {
+        Position prev_location;
+        Index spawn;
+         
+    };
+    
+    Board board_;
     vector<Tower> towers;
     vector<TowerPosition> tower_positions;
     // each tower, path points sorted by range  
     vector<vector<Index>> tower_scope;
     vector<vector<Index>> tower_scope_bounds;
+    
+    // creep id
+    unordered_map<Index, CreepInfo> creep_info; 
+    
+    
     
     map<Position, Index> dd;
     
@@ -138,58 +42,41 @@ public:
     
     }
     
-    
-    // spawn position can be convrted to integer as everything else
-    // current position, position of spawn, 
-    // map should be a pointer??? 
-    // try to use grid
-    // need grid to do things faster
-    // use hash from spawn location
-    
-    // Index - spawn location
-    // Position - next position for this spawn loc
-    
-    
-    // later
-    
-    
-    void Init() {
-        // find all spawn locations
-        
-        // from each location go breadth first search 
-        // find base and while go back assign grid
+    void Train(vector<Creep>& creep) {
+        for (Creep& c : creep) {
+            auto it = creep_info.find(c.id);
+            if (it == creep_info.end()) {
+                creep_info[c.id] = {c.pos, board_.spawn(c.pos)};
+            } else {
+                auto& info = it->second;
+                board_.set_next(info.spawn, info.prev_location, c.pos);
+            }
+        }
     }
-    
-    void Train(vector<Creep>& creep) {}
     
     
     // for each creep we assign spawn location
     vector<Count> Simulate(vector<Creep>& creep, vector<Index> spawn_loc) {
-        vector<Index> pos(creep.size());
-        // get positions and convert to shit
-        Count creeps_alive = creep.size();
-        
-        // should output how many get through out of which route
-        
-        vector<Count> miss_hp_per_route(board.spawn_loc_count(), 0);
-        
-        unordered_multiset<Index> creep_pos;
-        
-        
-        Count N = creep.size();
-        
-        // can create vector with indices actually
-        while (creeps_alive > 0) {
-            // creeps moves and attacks
-            for (Index i = 0; i < N; ++i) {
-                if (board.IsBaseNearby(pos[i])) {
-                    miss_hp_per_route[spawn_loc[i]] = creep[i].hp;
-                    creep[i].hp = 0;
-                    --creeps_alive; 
+        vector<Index> alive(creep.size());
+        iota(alive.begin(), alive.end(), 0);
+        vector<Count> route_hp_break(board_.spawn_loc_count(), 0);
+        while (!alive.empty()) {
+            // creep moves and attacks
+            for (Index i = 0; i < alive.size();) {
+                auto s = spawn_loc[alive[i]];
+                auto& c = creep[alive[i]];
+                auto n = board_.next(s, c.pos);
+                if (!n.second) {
+                    if (board_.IsBaseNearby(c.pos)) {
+                        route_hp_break[s] = c.hp;
+                        swap(alive.back(), alive[i]);
+                        alive.pop_back();
+                    } else {
+                        ++i;
+                    }
                 } else {
-                    if (board.some[pos[i]].find(spawn_loc[i]) == board.some[pos[i]].end()) throw runtime_error("lol");
-                    // what if new location for us... thats why we run train before this one
-                    pos[i] = board.some[pos[i]][spawn_loc[i]];
+                    c.pos = n.first;
+                    ++i;
                 }
             } 
             // now we do shooting
@@ -244,7 +131,63 @@ public:
         // return vector of creeps with hp who got through
     }
     
+    
+    vector<Position> open_tower_positions;
+    vector<double> coverage;
+    
+    double Score(vector<double>& c) {
+        return accumulate(c.begin(), c.end(), 1, [](double c_0, double c_1) {
+            return c_0*c_1;
+        });
+    }
+    
     void FindTowerPlacements(vector<Count>& route_miss_hp) {
+        if (accumulate(route_miss_hp.begin(), route_miss_hp.end(), 0) == 0) return;
+        
+        TowerPosition best_tower_position;
+        double best_score = 0;
+        Count best_pos_count = numeric_limits<int>::max(); 
+        for (const Position& p : open_tower_positions) {
+            for (Index i = 0; i < towers.size(); ++i) {
+                auto s = ComputeScope(TowerPosition(i, p));
+                // returns indices of paths
+                // need to compute set of all routes for this tower
+                // if nothing interesting we just skip it
+                bool stupid = true;
+                for (int j : s) {
+                    if (board.some[j].count()) {
+                    
+                    }
+                }
+                vector<double> coverage(route_count());
+                Count count = 0;
+                for (int j : s) {
+                    // first - route index
+                    // 
+                    for (auto pp : board.some[j]) {
+                       coverage[pp.first] += 1.;
+                       count += 1; 
+                    }
+                }
+                for (auto& c : coverage) {
+                    c /= count;
+                }
+                transform(coverage.begin(), coverage.end(), this->coverage.begin(), this->coverage.end(), [](double c_0, double c_1) {
+                    return c_0 + c_1;
+                });
+                // need to inlude somehow how much hp it takes out or something like this
+                // should be able to recievce iterators
+                double score = Score(coverage + this->coverage);
+                if (score > best_score || (abs(best_score - score) < 0.001 && best_pos_count < s.size())) {
+                    best_pos_count = s.size();
+                    best_score = score;
+                    best_tower_position = TowerPosition(i, p);
+                } 
+            }
+        }
+        PlaceTower(best_tower_position);
+        
+        
         // also base
         
         // coverage is vector of doubles
