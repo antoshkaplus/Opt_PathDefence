@@ -16,27 +16,28 @@
 
 using namespace ant::graph;
 
-
+// this class is performing role of world
 class Board {
     
     Count N;
     // also known as routes
     vector<Position> spawn_locations_;
+    // for some time base location may not be defined or defined wrong
+    vector<Position> base_locations_;
     Grid<map<Index, Position>*> paths_; 
     vector<string> picture_;
     
     
 public:    
     
-    
-    Board() {}
-    
     // this one straight from input
     Board(vector<string>& b) {
         N = b.size();
         picture_ = b;
         paths_.resize(N, N);
-        for (auto p : Region({0, 0}, {N, N})) {
+        Region rr{{0, 0}, {N, N}};
+        for (auto p : rr) {
+            assert(rr.hasInside(p));
             if (IsRoad(p)) {
                 paths_[p] = new map<Index, Position>();
             }
@@ -77,8 +78,12 @@ public:
         return ch >= '0' && ch <= '9';
     }
     
-    bool IsRoad(Position t) {
+    bool IsRoad(const Position& t) {
         return picture_[t.row][t.col] == CELL_ROAD;
+    }
+    
+    bool IsEmpty(const Position& t) {
+        return picture_[t.row][t.col] == CELL_EMPTY;
     }
     
     Count spawn_loc_count() const {
@@ -98,9 +103,21 @@ public:
         throw logic_error("spawn unknown!");
     }
     
+    Position spawn_loc(Index spawn) const {
+        return spawn_locations_[spawn];
+    }
+    
+    pair<Position, bool> base_loc_for_spawn(Index spawn) const {
+        return {base_locations_[spawn], base_locations_[spawn].row != -1};
+    }
+    
     void set_next(Index spawn, const Position& cur, const Position& next) {
-        auto p = *paths_[cur];
+        auto& p = *paths_[cur];
         p[spawn] = next;
+    }
+    
+    void set_base_for_spawn(Index spawn, const Position& base) {
+        base_locations_[spawn] = base;
     }
     
     pair<Position, bool> next(Index spawn, const Position& cur) {
@@ -116,6 +133,10 @@ public:
         return res;
     }
     
+    const map<Index, Position>& nexts(const Position& cur) const {
+        return *paths_(cur);
+    }
+    
 private:
  
     void ComputeSpawnLocations() {
@@ -127,8 +148,11 @@ private:
                 }
             }
         }
+        base_locations_.resize(spawn_locations_.size(), {-1, -1});
     }
-
+    
+    friend class Board_3;
+    friend class Board_2;
 };
 
 

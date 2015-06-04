@@ -1,5 +1,5 @@
 
-#include "path_defence.hpp"
+#include "path_defence_2.hpp"
 
 
 // expecting to be run from bin
@@ -45,7 +45,7 @@ int main(int argc, const char* argv[])
         
         vector<int> nts(nt);
         for_each(nts.begin(), nts.end(), read_int);
-        PathDefense defense;
+        PathDefense_2 defense;
         defense.init(b, M, h, m, nts);
         int nc; 
         for (int i = 0; i < 2000; ++i) {
@@ -75,23 +75,23 @@ int main(int argc, const char* argv[])
             res.flush();
             cout.flush();
         }
-        auto& s = defense.creeps_spawn_tick();
-        for (Index t : s) {
-            if (t == -1) break;
-            spawn_ticks << t << endl;
-        }
-        auto& s_2 = defense.tick_creep_count();
-        for (Index t : s_2) {
-            tick_creep_count << t << endl;
-        } 
-        auto& s_3 = defense.average_creep_count_increased();
-        for (bool b : s_3) {
-            ave_creep_count << b << endl;
-        }
-        auto s_4 = defense.wave_score();
-        for (double b : s_4) {
-            wave_score << b << endl;
-        } 
+//        auto& s = defense.creeps_spawn_tick();
+//        for (Index t : s) {
+//            if (t == -1) break;
+//            spawn_ticks << t << endl;
+//        }
+//        auto& s_2 = defense.tick_creep_count();
+//        for (Index t : s_2) {
+//            tick_creep_count << t << endl;
+//        } 
+//        auto& s_3 = defense.average_creep_count_increased();
+//        for (bool b : s_3) {
+//            ave_creep_count << b << endl;
+//        }
+//        auto s_4 = defense.wave_score();
+//        for (double b : s_4) {
+//            wave_score << b << endl;
+//        } 
     } catch (exception& exp) {
         logger << exp.what();
         logger.flush();

@@ -61,6 +61,13 @@ struct TowerPosition {
     : tower(tower), position(position) {}
 };
 
+struct BreakThrough {
+    Position cur_loc;
+    Index spawn_loc;
+    
+    BreakThrough(const Position& loc, Index spawn) 
+        : cur_loc(loc), spawn_loc(spawn) {}
+};
 
 constexpr Count MAX_CREEP_COUNT = 2000;
 constexpr Count TICK_COUNT = 2000;
@@ -78,5 +85,12 @@ constexpr char CELL_BASE = 'b';
 
 //using Board = Grid<char>;
 
+class Board_2;
+
+void PlaceTower(vector<Count>& route_miss_hp, 
+                Board_2& board, 
+                vector<double>& current_coverage, 
+                Count& money,
+                const vector<BreakThrough>& break_through);
 
 #endif

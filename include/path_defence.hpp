@@ -173,7 +173,7 @@ private:
             // can store just pointers inside Creep structure
             // and take everything by index
             Index id = cc[4*i];
-            current_creeps_[i] = {id, cc[4*i+1], cc[4*i+3], cc[4*i+2]};
+            current_creeps_[i] = {id, {cc[4*i+3], cc[4*i+2]}, cc[4*i+1]};
             if (creeps_spawn_tick_[id] == -1) {
                 creeps_spawn_tick_[id] = current_tick_;
             }
@@ -296,7 +296,7 @@ public:
     void UpdateCreepPositions() {
         set<Index> cc;
         for (auto c : current_creeps_) {
-            creep_positions_[c.id].emplace_back(c.r, c.c);
+            creep_positions_[c.id].push_back(c.pos);
             cc.insert(c.id);
         }
         for (auto prev : previous_creeps_) {
@@ -347,8 +347,8 @@ public:
                     t *= 1-regression_factor_;
                 }
                 for (auto c : current_creeps_) {
-                    creep_positions_[c.id].emplace_back(c.r, c.c);
-                    if (!creep_discarded_[c.id] && IsBaseNearby(Position{c.r, c.c})) {
+                    creep_positions_[c.id].push_back(c.pos);
+                    if (!creep_discarded_[c.id] && IsBaseNearby(c.pos)) {
                         // need to increase scores
                         // ave shots 4. ave dmg 3
                         need_towers_ += c.hp / (4 * 3.);

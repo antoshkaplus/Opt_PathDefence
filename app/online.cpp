@@ -1,6 +1,6 @@
 
+#include "path_defence_2.hpp"
 #include "path_defence.hpp"
-
 
 
 
@@ -42,7 +42,7 @@ int main(int argc, const char* argv[])
         
         vector<int> nts(nt);
         for_each(nts.begin(), nts.end(), read_int);
-        PathDefense defense;
+        PathDefense_2 defense;
         defense.init(b, M, h, m, nts);
         int nc; 
         for (int i = 0; i < 2000; ++i) {
