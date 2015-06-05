@@ -24,7 +24,7 @@ struct Score {
         min = numeric_limits<double>::max();
         for (auto m : c) {
             if (m == 0) {
-             //   ++zeros; 
+                //   ++zeros; 
             } else if (m < min) {
                 min = m;
             }
@@ -88,6 +88,12 @@ void PlaceTower(vector<Count>& route_miss_hp,
         return d >= 4;
     };
     auto& ts = board.towers();
+    
+    
+    
+    
+    
+    
     for (const Position& p : board.open_tower_positions()) {
         int k = 0;
         for (int i = 1; i < ts.size(); ++i) {

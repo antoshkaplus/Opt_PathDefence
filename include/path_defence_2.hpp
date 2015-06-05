@@ -10,11 +10,13 @@
 #define PathDefence_path_defence_2_hpp
 
 #include "simulator.hpp"
+#include "place_tower.hpp"
 
 class PathDefense_2 {
 
     Simulator* simulator;
     Board_2* board;
+    PlaceTower* place; 
     
     Index iteration = 0;
     array<Index, MAX_CREEP_COUNT> creep_spawn;
@@ -56,6 +58,7 @@ public:
         }
         this->board = new Board_2(board, towers);
         this->simulator = new Simulator(*(this->board));
+        this->place = new PlaceTower(*(this->board));
         coverage.resize(this->board->spawn_loc_count(), 0);
         return 1;
     }     
@@ -88,7 +91,7 @@ public:
         while (true) {
             tie(route_hp_break, break_through) = simulator->Simulate(creeps, spawns);
             if (!break_through.empty()) {
-                PlaceTower(route_hp_break, *board, coverage, money, break_through); 
+                place->Place(route_hp_break, break_through, money);
             }
             auto& tt = board->placed_towers();
             if (last_tower_count == tt.size()) break;

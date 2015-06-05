@@ -87,10 +87,7 @@ constexpr char CELL_BASE = 'b';
 
 class Board_2;
 
-void PlaceTower(vector<Count>& route_miss_hp, 
-                Board_2& board, 
-                vector<double>& current_coverage, 
-                Count& money,
-                const vector<BreakThrough>& break_through);
+vector<double> ComputeCoverage(const Board_2& b, const TowerPosition& tp);
+
 
 #endif
