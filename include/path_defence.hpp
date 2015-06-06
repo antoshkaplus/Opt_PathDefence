@@ -25,7 +25,7 @@ struct Score {
 class PathDefense {
 private:
    
-        Count N;
+    Count N;
     vector<Position> base_positions_;
     vector<vector<Position>> creep_positions_;
     vector<bool> creep_discarded_;
