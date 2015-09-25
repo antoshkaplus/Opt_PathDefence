@@ -88,12 +88,6 @@ void PlaceTower(vector<Count>& route_miss_hp,
         return d >= 4;
     };
     auto& ts = board.towers();
-    
-    
-    
-    
-    
-    
     for (const Position& p : board.open_tower_positions()) {
         int k = 0;
         for (int i = 1; i < ts.size(); ++i) {

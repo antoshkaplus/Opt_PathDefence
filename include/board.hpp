@@ -151,7 +151,6 @@ private:
         base_locations_.resize(spawn_locations_.size(), {-1, -1});
     }
     
-    friend class Board_3;
     friend class Board_2;
 };
 

@@ -29,7 +29,7 @@ class PlaceTower {
         double miss_hp_coverage;
         
         // by this particular element 
-        double total_coverage;
+        double coverage;
         
         // count * dmg
         
