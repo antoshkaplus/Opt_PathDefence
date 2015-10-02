@@ -9,9 +9,12 @@
 // expecting to be run from bin
 int main(int argc, const char* argv[])
 {
-    // need to set logger inside class or create some special class probably
+    // this file contains everything we receive from the game
     ofstream out("../output/input.txt");
+    // this file contains different stats we want to get from the solver
     ofstream res("../output/res.txt");
+    // this file contains everything we want to log:
+    // debugging information, errors and so forth
     ofstream logger("../output/log.txt");
     
     try {
@@ -58,9 +61,7 @@ int main(int argc, const char* argv[])
             vector<int> bh(B);
             for_each(bh.begin(), bh.end(), read_int);
             vector<int> ret;
-            //cout << "before" <<endl;
             ret = defense.placeTowers(creep, m, bh);
-            //cout << "after" << endl;
             logger << i << endl;
             cout << ret.size() << endl;
             res << ret.size() << endl;

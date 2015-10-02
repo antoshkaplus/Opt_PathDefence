@@ -6,11 +6,11 @@
 //
 //
 
-#ifndef PathDefence_path_defence_2_hpp
-#define PathDefence_path_defence_2_hpp
+#pragma once
 
 #include "simulator.hpp"
 #include "place_tower.hpp"
+
 
 class PathDefense_2 {
 
@@ -110,6 +110,3 @@ public:
     }
 };
 
-
-
-#endif
