@@ -16,32 +16,22 @@
 
 using namespace ant::graph;
 
+
 // this class is performing role of world
 class Board {
     
+    
     Count N;
-    // also known as routes
     vector<Position> spawn_locations_;
-    // for some time base location may not be defined or defined wrong
-    vector<Position> base_locations_;
-    Grid<map<Index, Position>*> paths_; 
-    vector<string> picture_;
+    Grid<char> picture_;
     
-    
+      
 public:    
     
     // this one straight from input
-    Board(vector<string>& b) {
-        N = b.size();
-        picture_ = b;
-        paths_.resize(N, N);
-        Region rr{{0, 0}, {N, N}};
-        for (auto p : rr) {
-            assert(rr.hasInside(p));
-            if (IsRoad(p)) {
-                paths_[p] = new map<Index, Position>();
-            }
-        }
+    Board(const vector<string>& b) {
+        N = static_cast<Count>(b.size());
+        picture_ = ToGrid(b);
         ComputeSpawnLocations();
     }
     
@@ -74,16 +64,20 @@ public:
     
     
     bool IsBase(const Position& t) {
-        char ch = picture_[t.row][t.col];
+        char ch = picture_[t];
         return ch >= '0' && ch <= '9';
     }
     
     bool IsRoad(const Position& t) {
-        return picture_[t.row][t.col] == CELL_ROAD;
+        return picture_[t] == CELL_ROAD;
     }
     
     bool IsEmpty(const Position& t) {
-        return picture_[t.row][t.col] == CELL_EMPTY;
+        return picture_[t] == CELL_EMPTY;
+    }
+    
+    bool IsInside(const Position& t) {
+        return picture_.isInside(t);
     }
     
     Count spawn_loc_count() const {
@@ -91,7 +85,7 @@ public:
     }
     
     void PlaceTower(const Position& p) {
-        picture_[p.row][p.col] = CELL_TOWER;
+        picture_[p] = CELL_TOWER;
     }
  
     Index spawn(const Position& p) {
@@ -103,38 +97,12 @@ public:
         throw logic_error("spawn unknown!");
     }
     
+    const vector<Position>& spawn_locs() const {
+        return spawn_locations_;
+    }
+    
     Position spawn_loc(Index spawn) const {
         return spawn_locations_[spawn];
-    }
-    
-    pair<Position, bool> base_loc_for_spawn(Index spawn) const {
-        return {base_locations_[spawn], base_locations_[spawn].row != -1};
-    }
-    
-    void set_next(Index spawn, const Position& cur, const Position& next) {
-        auto& p = *paths_[cur];
-        p[spawn] = next;
-    }
-    
-    void set_base_for_spawn(Index spawn, const Position& base) {
-        base_locations_[spawn] = base;
-    }
-    
-    pair<Position, bool> next(Index spawn, const Position& cur) {
-        auto end = paths_[cur]->end();
-        auto it = paths_[cur]->find(spawn);
-        pair<Position, bool> res;
-        if (it == end) {
-            res.second = false;
-        } else {
-            res.second = true;
-            res.first = it->second;
-        }
-        return res;
-    }
-    
-    const map<Index, Position>& nexts(const Position& cur) const {
-        return *paths_(cur);
     }
     
 private:
@@ -148,7 +116,6 @@ private:
                 }
             }
         }
-        base_locations_.resize(spawn_locations_.size(), {-1, -1});
     }
     
     friend class Board_2;

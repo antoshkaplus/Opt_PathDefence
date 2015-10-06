@@ -16,7 +16,7 @@ struct TowerScope {
     vector<Index> bounds;
 };
 
-
+// adding tower support
 class Board_2 : public Board {
     
     vector<Tower> towers_;
@@ -82,7 +82,7 @@ public:
     
     void PlaceTower(const TowerPosition& tp) {
         auto& p = tp.position;
-        picture_[p.row][p.col] = CELL_TOWER;
+        picture_[p] = CELL_TOWER;
         placed_towers_.push_back(tp);
         auto& pp = open_tower_positions_;
         pp.erase(find(pp.begin(), pp.end(), tp.position));

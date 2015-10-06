@@ -1,6 +1,7 @@
 
 #include "path_defence_2.hpp"
-
+#include "path_finder.hpp"
+#include "next.hpp"
 
 // expecting to be run from bin
 int main(int argc, const char* argv[])

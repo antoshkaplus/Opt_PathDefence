@@ -17,8 +17,8 @@
 
 
 #include "ant/core/core.hpp"
-#include "ant/geometry/d2.h"
-#include "ant/grid.h"
+#include "ant/geometry/d2.hpp"
+#include "ant/grid.hpp"
 
 
 
@@ -27,16 +27,20 @@ using namespace ant;
 using namespace ant::grid;
 
 
+using Path = vector<Position>;
+
 
 struct Creep {
+    Index spawn;
     Position pos;
     Index id;
     Count hp;
-    
+    // how long stays alive
+    Count ticks;
     
     Creep() {}
-    Creep(Index id, Position pos, Count hp)
-    : pos(pos), id(id), hp(hp) {}
+    Creep(Index id, Position pos, Count hp, Count ticks = 0)
+    : pos(pos), id(id), hp(hp), ticks(ticks) {}
 };
 
 struct Tower {
