@@ -17,6 +17,7 @@ struct TowerScope {
 };
 
 // going to place towers from this class
+
 // also this class should know everything cool
 class TowerManager {
     
@@ -30,16 +31,19 @@ class TowerManager {
 public:
     TowerManager(Board& board, const vector<Tower>& towers) 
         : board_(&board), towers_(&towers) {
-    
+        
+        const auto& b = *board_; 
+        const auto& t = *towers_; 
+        Count N = b.size();
         // computing open_tower_positions
         tower_scopes_.resize(N, N);
         Region R{{0, 0}, {N, N}}; 
         auto func = [&](const Position& p) {
             assert(R.hasInside(p));
-            if (IsEmpty(p)) {
+            if (b.IsEmpty(p)) {
                 tower_scopes_(p) = new vector<TowerScope>;
                 auto& v = *tower_scopes_(p); 
-                for (Index i = 0; i < towers_.size(); ++i) {
+                for (auto i = 0; i < t.size(); ++i) {
                     v.push_back(ComputeTowerScope({i, p}));
                 }
                 open_tower_positions_.push_back(p);
@@ -50,8 +54,9 @@ public:
     
     
     void PlaceTower(const TowerPosition& tp) {
+        auto& b = *board_; 
         auto& p = tp.position;
-        picture_[p] = CELL_TOWER;
+        b.PlaceTower(p);
         placed_towers_.push_back(tp);
         auto& pp = open_tower_positions_;
         pp.erase(find(pp.begin(), pp.end(), tp.position));
@@ -62,7 +67,7 @@ public:
     }
     
     const vector<Tower>& towers() const {
-        return towers_;
+        return *towers_;
     } 
     
     const vector<Position> open_tower_positions() const {
@@ -80,14 +85,17 @@ private:
     TowerScope ComputeTowerScope(const TowerPosition& tp) {
         vector<Position> scope;
         vector<Count> score;
-        assert(tp.tower < towers_.size());
-        auto rng = towers_[tp.tower].rng;
+        const auto& t = *towers_;
+        const auto& b = *board_;
+        auto N = b.size();
+        assert(tp.tower < t.size());
+        auto rng = t[tp.tower].rng;
         auto p = tp.position;
         for (auto r = max(p.row - rng-1, 0); r < min(p.row + rng+1, N); ++r) {
             for (auto c = max(p.col - rng-1, 0); c < min(p.col + rng+1, N); ++c) {
                 Position q{r, c};
                 auto d = (r - p.row)*(r - p.row) + (c - p.col)*(c - p.col); 
-                if (d <= rng*rng && IsRoad(q)) {
+                if (d <= rng*rng && b.IsRoad(q)) {
                     scope.push_back(q);
                     score.push_back(d);
                 }

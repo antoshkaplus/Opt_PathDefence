@@ -13,98 +13,109 @@
 #include <map>
 
 #include "tower_manager.hpp"
+#include "next.hpp"
 
 
 // simulating creep movement on the given board
 // under tower shooting.
+
+// can have some statistics inside
+// not really forsed to return it right away
 class Simulator {
     
-    Board_2& board_;
+    const Board* board_;
+    const TowerManager* tower_manager_;
+    const Next* next_;
+    
+    // going to update creeps in place
+    vector<Creep>* creeps_; 
+    // after creep moves into base skip him
+    // when creep becomes dead also skip him
+    Count skip_count_;
+    vector<bool> skip_;
+    // creep location => index in vector
+    unordered_multimap<Position, Index> creep_positioning_;
+    
+public:
 
-    bool IsAnyAlive(const vector<Creep>& cs) {
-        for (auto& c : cs) {
-            if (c.hp > 0) {
+    Simulator(const Board& board, const TowerManager& tower_manager, const Next& next) 
+        : board_(&board), tower_manager_(&tower_manager) {}
+    
+    void Simulate(vector<Creep>& creeps) {
+        creeps_ = &creeps;
+        skip_.resize(creeps.size());
+        fill(skip_.begin(), skip_.end(), false);
+        skip_count = 0;
+        
+        const auto& b = *board_;
+        const auto& next = *next_;
+        
+        while (skip_count != creeps.size()) {
+            CreepsMove();
+            TowersShoot();
+        }
+    }
+    
+private:
+
+    void CreepsMove() {
+        auto& cs = *creeps_;
+        for (auto i = 0; i < cs.size(); ++i) {
+            if (skip[i]) continue;
+            cs[i].pos = next.next(cs[i]);
+            if (b.IsBase(cs[i].pos)) {
+                skip[i] = true;
+            }
+        }
+    }
+
+    void TowersShoot() {
+        // now we do shooting
+        auto& cs = *creeps_;
+        auto& ts = tower_manager_->towers();
+        for (auto& pt : tower_manager_->placed_towers()) {
+            Index first = 0;
+            auto& sc = tower_manager_->tower_scope(pt);
+            for (Index last : sc.bounds) {
+                vector<Index> inds;
+                for (Index j = first; j < last; ++j) {
+                    auto r = creep_positioning_.equal_range(sc.positions[j]);
+                    for (auto it = r.first; it != r.second; ++it) {
+                        inds.push_back(it->second);
+                    }
+                }
+                // now we have array of minions on equal distance
+                sort(inds.begin(), inds.end(), [&] (Index i_0, Index i_1) {
+                    return cs[i_0].id < cs[i_1].id;
+                });
+                if (ShootAliveCreep(inds, ts[pt.tower].dmg)) {
+                    break;
+                }
+            }
+        }
+    }
+    
+    void ComputeCreepPositioning() {
+        creep_positioning_.clear();
+        const auto& cs = *creeps_; 
+        for (Index i = 0; i < cs.size(); ++i) {
+            if (skip_[i]) continue; 
+            creep_positioning_.insert({cs[i].pos, i});
+        }
+    }
+    
+    bool ShootAliveCreep(const vector<Index>& creep_indices, Count dmg) {
+        auto& cs = *creeps_;
+        for (auto i : inds) {
+            if (cs[i].hp > 0) {
+                cs[i].hp -= dmg;
+                if (cs[i] <= 0) {
+                    skip[i] = true;
+                }
                 return true;
             }
         }
         return false;
     }
-    
-public:
 
-    Simulator(Board_2& board) : board_(board) {}
-    
-    // for each creep we assign spawn location
-    tuple<vector<Count>, vector<BreakThrough>> Simulate(const vector<Creep>& creep_const) {
-        vector<Creep> creep = creep_const;
-        Count N = creep.size();
-        // getting i din't know why
-        vector<Position> creep_starting_positions(N);
-        for (Index i = 0; i < N; ++i) {
-            creep_starting_positions[i] = creep[i].pos;
-        }
-        // wtf???
-        vector<Count> route_hp_break(board_.spawn_loc_count(), 0);
-        vector<BreakThrough> break_through;
-        // just for loop for everyone... and don't mess up with this array
-        // may skip it actually
-        Index iteration = 0;
-        // why someone alive or ...
-        while (IsAnyAlive(creep) && iteration++ < 200) {
-            // creep moves and attacks
-            for (Index i = 0; i < N; ++i) {
-                auto& c = creep[i];
-                if (c.hp <= 0) continue;
-                auto s = spawn_loc[i];
-                auto n = board_.next(s, c.pos);
-                if (!n.second) {
-                    if (board_.IsBaseNearby(c.pos)) {
-                        // later should change this data
-                        break_through.emplace_back(creep_starting_positions[i], s);
-                        board_.set_base_for_spawn(s, c.pos);
-                        route_hp_break[s] += c.hp;
-                        c.hp = 0;
-                    } else {
-                        c.hp = 0;
-                    }
-                } else {
-                    c.pos = n.first;
-                }
-            } 
-            
-            unordered_multimap<Position, Index> m;
-            for (Index i = 0; i < N; ++i) {
-                m.insert({creep[i].pos, i});
-            }
-            
-            // now we do shooting
-            for (auto& pt : board_.placed_towers()) {
-                Index first = 0;
-                // could just go with index
-                auto& sc = board_.tower_scope(pt);
-                for (Index last : sc.bounds) {
-                    vector<Index> inds;
-                    for (Index j = first; j < last; ++j) {
-                        auto r = m.equal_range(sc.positions[j]);
-                        for (auto it = r.first; it != r.second; ++it) {
-                            inds.push_back(it->second);
-                        }
-                    }
-                    // now we have array of minions on equal distance
-                    sort(inds.begin(), inds.end(), [&] (Index i_0, Index i_1) {
-                        return creep[i_0].id < creep[i_1].id;
-                    });
-                    for (auto i : inds) {
-                        if (creep[i].hp > 0) {
-                            auto& tt = board_.towers();
-                            creep[i].hp -= tt[pt.tower].dmg;
-                            goto next_tower;
-                        }
-                    }
-                }
-                next_tower:;
-            }
-        }   
-        return {route_hp_break, break_through};
-    }
 };

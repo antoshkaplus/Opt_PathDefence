@@ -63,20 +63,20 @@ public:
     }
     
     
-    bool IsBase(const Position& t) {
+    bool IsBase(const Position& t) const {
         char ch = picture_[t];
         return ch >= '0' && ch <= '9';
     }
     
-    bool IsRoad(const Position& t) {
+    bool IsRoad(const Position& t) const {
         return picture_[t] == CELL_ROAD;
     }
     
-    bool IsEmpty(const Position& t) {
+    bool IsEmpty(const Position& t) const {
         return picture_[t] == CELL_EMPTY;
     }
     
-    bool IsInside(const Position& t) {
+    bool IsInside(const Position& t) const {
         return picture_.isInside(t);
     }
     
@@ -103,6 +103,10 @@ public:
     
     Position spawn_loc(Index spawn) const {
         return spawn_locations_[spawn];
+    }
+    
+    Count size() const {
+        return N;
     }
     
 private:
