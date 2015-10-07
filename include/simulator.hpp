@@ -6,15 +6,17 @@
 //
 //
 
-#ifndef PathDefence_simulator_hpp
-#define PathDefence_simulator_hpp
+#pragma once
+
 
 #include <unordered_map>
 #include <map>
 
-#include "board_2.hpp"
+#include "tower_manager.hpp"
 
 
+// simulating creep movement on the given board
+// under tower shooting.
 class Simulator {
     
     Board_2& board_;
@@ -106,5 +108,3 @@ public:
         return {route_hp_break, break_through};
     }
 };
-
-#endif

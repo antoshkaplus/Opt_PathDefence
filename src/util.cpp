@@ -7,7 +7,6 @@
 //
 
 #include "util.hpp"
-#include "board_2.hpp"
 
 
 //
