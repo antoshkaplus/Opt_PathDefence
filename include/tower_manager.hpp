@@ -46,6 +46,9 @@ public:
                 for (auto i = 0; i < t.size(); ++i) {
                     v.push_back(ComputeTowerScope({i, p}));
                 }
+                // can think about not including position if no 
+                // positions in scope
+                // may also divide good open position and everything else
                 open_tower_positions_.push_back(p);
             }
         };
@@ -78,6 +81,10 @@ public:
         return (*tower_scopes_(tp.position))[tp.tower];
     }
 
+    const Board& board() const {
+        return *board_;
+    }
+    
     
 private:
 

@@ -16,7 +16,7 @@ class Next {
     // first Position is spawn, last - base
     vector<Path> available_paths_;
     vector<Path> current_paths_;
-    const Board& board_;
+    const Board* board_;
     
 public:
     Next(const Board& board) : board_(&board) {
@@ -27,7 +27,7 @@ public:
         });
         auto sp = board.spawn_locs();
         for (auto s : sp) {
-            for (auto it = available_paths_.begin(); it != available_paths_.end(); ++it)
+            for (auto it = available_paths_.begin(); it != available_paths_.end(); ++it) {
                 auto& ap = *it;
                 if (s == ap[0]) {
                     current_paths_.push_back(ap);
@@ -36,22 +36,42 @@ public:
                 }
             }
         }
-        if (current_path_.size() != sp.size()) {
+        if (current_paths_.size() != sp.size()) {
             throw runtime_error("lol");
         }
     }
     
-    Position next(const Creep& creep) {
-        if (current_paths_[creep.ticks] != creep.pos) {
+    Position base_loc_for_spawn(const Position& spawn) const {
+        for (auto& p : current_paths_) {
+            if (p[0] == spawn) return p.back();
+        }
+        throw logic_error("no base location for spawn!");
+    }
+    
+    Position base_loc_for_spawn(Index spawn) const {
+        
+    }
+    
+    Index base_for_spawn(Index spawn) const {
+        
+    }
+    
+    void check(const Creep& creep) {
+        auto& cp = current_paths_[creep.spawn];
+        if (cp[creep.ticks] != creep.pos) {
             Replace(creep);
         }
-        return current_paths_[creep.ticks+1];
+    }
+    
+    Position next(const Creep& creep) const {
+        auto& cp = current_paths_[creep.spawn];
+        return cp[creep.ticks+1];
     }
     
 private:
     void Replace(const Creep& creep) {
         auto spawn = creep.spawn;
-        auto sp = board_.spawn_locs();
+        auto& sp = board_->spawn_locs();
         auto it = std::find_if(available_paths_.begin(), available_paths_.end(), [&](auto& ap) {
             return ap[0] == sp[creep.spawn] && ap[creep.ticks] == creep.pos;
         });

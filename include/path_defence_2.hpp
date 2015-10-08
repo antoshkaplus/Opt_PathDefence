@@ -9,14 +9,14 @@
 #pragma once
 
 #include "simulator.hpp"
-#include "place_tower.hpp"
+#include "tower_placer.hpp"
 
 
 class PathDefense_2 {
 
     Simulator* simulator;
-    Board_2* board;
-    PlaceTower* place; 
+    Board* board;
+    TowerPlacer* place; 
     
     Index iteration = 0;
     array<Index, MAX_CREEP_COUNT> creep_spawn;

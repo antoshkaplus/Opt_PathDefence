@@ -7,7 +7,7 @@
 //
 
 #include "util.hpp"
-
+#include "tower_manager.hpp"
 
 //
 //vector<Position> open_tower_positions;
@@ -39,18 +39,18 @@ struct Score {
 };
 
 
-//vector<double> ComputeCoverage(const Board& b, const TowerPosition& tp) {
-//    auto& s = tp.tower_scope(tp);
-//    vector<double> coverage(b.spawn_loc_count(), 0);
-//    for (Position p : s.positions) {
-//        // need first for spawn index
+vector<double> ComputeCoverage(const TowerManager& m, const TowerPosition& tp) {
+    auto& s = m.tower_scope(tp);
+    vector<double> coverage(m.board().spawn_loc_count(), 0);
+    for (Position p : s.positions) {
+        // need first for spawn index
 //        auto& bn = b.nexts(p);
 //        for (auto& q : bn) {
 //            coverage[q.first] += 1;
 //        }
-//    }
-//    return coverage;
-//}
+    }
+    return coverage;
+}
 
 
 

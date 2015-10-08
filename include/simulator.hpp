@@ -45,12 +45,9 @@ public:
         creeps_ = &creeps;
         skip_.resize(creeps.size());
         fill(skip_.begin(), skip_.end(), false);
-        skip_count = 0;
-        
-        const auto& b = *board_;
-        const auto& next = *next_;
-        
-        while (skip_count != creeps.size()) {
+        skip_count_ = 0;
+
+        while (skip_count_ != creeps.size()) {
             CreepsMove();
             TowersShoot();
         }
@@ -60,11 +57,13 @@ private:
 
     void CreepsMove() {
         auto& cs = *creeps_;
+        auto& nt = *next_;
+        auto& b = *board_;
         for (auto i = 0; i < cs.size(); ++i) {
-            if (skip[i]) continue;
-            cs[i].pos = next.next(cs[i]);
+            if (skip_[i]) continue;
+            cs[i].pos = nt.next(cs[i]);
             if (b.IsBase(cs[i].pos)) {
-                skip[i] = true;
+                skip_[i] = true;
             }
         }
     }
@@ -106,11 +105,11 @@ private:
     
     bool ShootAliveCreep(const vector<Index>& creep_indices, Count dmg) {
         auto& cs = *creeps_;
-        for (auto i : inds) {
+        for (auto i : creep_indices) {
             if (cs[i].hp > 0) {
                 cs[i].hp -= dmg;
-                if (cs[i] <= 0) {
-                    skip[i] = true;
+                if (cs[i].hp <= 0) {
+                    skip_[i] = true;
                 }
                 return true;
             }

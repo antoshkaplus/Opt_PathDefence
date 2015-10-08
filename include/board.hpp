@@ -23,6 +23,7 @@ class Board {
     
     Count N;
     vector<Position> spawn_locations_;
+    vector<Position> base_locations_;
     Grid<char> picture_;
     
       
@@ -33,6 +34,7 @@ public:
         N = static_cast<Count>(b.size());
         picture_ = ToGrid(b);
         ComputeSpawnLocations();
+        ComputeBaseLocations();
     }
     
     template<class Process>
@@ -84,6 +86,10 @@ public:
         return spawn_locations_.size();
     }
     
+    Count base_loc_count() const {
+        return base_locations_.size();
+    }
+    
     void PlaceTower(const Position& p) {
         picture_[p] = CELL_TOWER;
     }
@@ -97,12 +103,29 @@ public:
         throw logic_error("spawn unknown!");
     }
     
+    Index base(const Position& p) {
+        for (Index i = 0; i < base_locations_.size(); ++i) {
+            if (base_locations_[i] == p) {
+                return i;
+            }
+        }
+        throw logic_error("base unknown!");
+    }
+    
     const vector<Position>& spawn_locs() const {
         return spawn_locations_;
     }
     
+    const vector<Position>& base_locs() const {
+        return base_locations_;
+    } 
+    
     Position spawn_loc(Index spawn) const {
         return spawn_locations_[spawn];
+    }
+    
+    Position base_loc(Index base) const {
+        return base_locations_[base];
     }
     
     Count size() const {
@@ -121,6 +144,15 @@ private:
             }
         }
     }
+    
+    void ComputeBaseLocations() {
+        for (auto p : Region(picture_.size())) {
+            if (IsBase(p)) {
+                base_locations_.push_back(p);
+            }
+        }
+    }
+    
     
     friend class Board_2;
 };

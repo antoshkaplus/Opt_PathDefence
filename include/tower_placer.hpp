@@ -6,13 +6,15 @@
 //
 //
 
-#ifndef PathDefence_place_tower_hpp
-#define PathDefence_place_tower_hpp
+#pragma once
+
 
 #include "util.hpp"
-#include "board_2.hpp"
+#include "tower_manager.hpp"
 
-class PlaceTower {
+// this class is used to determine where to place 
+// new tower
+class TowerPlacer {
 
     struct Item : TowerPosition {
         // want it bigger
@@ -38,18 +40,14 @@ class PlaceTower {
         
         Count count;
     };
-
-    Board_2& board;
-    vector<double> current_coverage; 
-
-
+    // 
     double Score(const Item& t) {
-        auto& ts = board.towers();
+        auto& ts = tower_manager_->towers();
         return 1.*t.min_total_coverage + 20.*t.miss_hp_coverage + 10*t.count*ts[t.tower].dmg;
     }
 
     pair<Item, bool> ChooseItem(vector<Item>& items, int money) {
-        auto& ts = board.towers();
+        auto& ts = tower_manager_->towers();
         Count N = items.size();
         vector<double> values(N);
         vector<Index> inds(N);
@@ -86,9 +84,9 @@ class PlaceTower {
 
 
 public:
-    PlaceTower(Board_2& board) : 
-            board(board), 
-            current_coverage(board.spawn_loc_count(), 0) {}
+    TowerPlacer(TowerManager& manager, const Next& next) : 
+            tower_manager_(&manager), 
+            current_coverage(manager.board().spawn_loc_count(), 0) {}
     
     
     // coverage starts with 0-s and it's equal to number of routes
@@ -118,7 +116,7 @@ public:
             int d = (c.row*c.row + c.col*c.col) - (t.col*t.col + t.row*t.row);
             return d >= 4;
         };
-        auto& ts = board.towers();
+        auto& ts = tower_manager_->towers();
         
         auto func = [&](const Item& i_0, const Item& i_1) {
             double d_0 = Score(i_0);
@@ -128,12 +126,12 @@ public:
         };
         set<Item, decltype(func)> best_items(func);
         const int BEST_MAX_COUNT = 10;
-        for (const Position& p : board.open_tower_positions()) {
+        for (const Position& p : tower_manager_->open_tower_positions()) {
             for (Index i = 0; i < ts.size(); ++i) {
                 Item item;
                 item.tower = i;
                 item.position = p;
-                auto coverage = ComputeCoverage(board, item);
+                auto coverage = ComputeCoverage(*tower_manager_, item);
                 item.count = int(accumulate(coverage.begin(), coverage.end(), 0));
                 transform(coverage.begin(), coverage.end(), coverage.begin(), [&](double d) {
                     if (d > 1) {
@@ -159,9 +157,8 @@ public:
                 if (stupid) continue;
                 stupid = true;
                 for (auto& b : break_through) {
-                    auto bb = board.base_loc_for_spawn(b.spawn_loc);
-                    if (!bb.second) continue;
-                    if (coverage[b.spawn_loc] > 0 && can_wound(b.cur_loc, p, bb.first)) {
+                    auto bb = next_->base_loc_for_spawn(b.spawn_loc);
+                    if (coverage[b.spawn_loc] > 0 && can_wound(b.cur_loc, p, bb)) {
                         stupid = false;
                         break;
                     }
@@ -187,9 +184,9 @@ public:
             p.first.position.col--;
         }
         if (p.second) {
-            board.PlaceTower(p.first);
-            money -= board.towers()[p.first.tower].cost;
-            auto coverage = ComputeCoverage(board, p.first);
+            tower_manager_->PlaceTower(p.first);
+            money -= tower_manager_->towers()[p.first.tower].cost;
+            auto coverage = ComputeCoverage(*tower_manager_, p.first);
             transform(coverage.begin(), coverage.end(), 
                       current_coverage.begin(), 
                       current_coverage.begin(), sum);
@@ -199,8 +196,10 @@ public:
     }
     
     
-
+    
+    TowerManager* tower_manager_;
+    const Next* next_; 
+    vector<double> current_coverage; 
+    
 };
 
-
-#endif

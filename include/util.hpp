@@ -29,6 +29,8 @@ using namespace ant::grid;
 
 using Path = vector<Position>;
 
+class TowerManager;
+
 
 struct Creep {
     Index spawn;
@@ -89,9 +91,9 @@ constexpr char CELL_BASE = 'b';
 
 //using Board = Grid<char>;
 
-class Board_2;
 
-vector<double> ComputeCoverage(const Board_2& b, const TowerPosition& tp);
+
+vector<double> ComputeCoverage(const TowerManager& b, const TowerPosition& tp);
 
 
 #endif
