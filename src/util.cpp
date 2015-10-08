@@ -43,6 +43,7 @@ vector<double> ComputeCoverage(const TowerManager& m, const TowerPosition& tp) {
     auto& s = m.tower_scope(tp);
     vector<double> coverage(m.board().spawn_loc_count(), 0);
     for (Position p : s.positions) {
+        (void)p;
         // need first for spawn index
 //        auto& bn = b.nexts(p);
 //        for (auto& q : bn) {

@@ -86,7 +86,11 @@ public:
         return spawn_locations_.size();
     }
     
-    Count base_loc_count() const {
+    Index base(const Position& p) const {
+        return picture_[p] - '0';
+    }
+    
+    Count base_count() const {
         return base_locations_.size();
     }
     
@@ -101,15 +105,6 @@ public:
             }
         }
         throw logic_error("spawn unknown!");
-    }
-    
-    Index base(const Position& p) {
-        for (Index i = 0; i < base_locations_.size(); ++i) {
-            if (base_locations_[i] == p) {
-                return i;
-            }
-        }
-        throw logic_error("base unknown!");
     }
     
     const vector<Position>& spawn_locs() const {
@@ -146,15 +141,24 @@ private:
     }
     
     void ComputeBaseLocations() {
+        Count count = CountBases();
+        base_locations_.resize(count);
         for (auto p : Region(picture_.size())) {
             if (IsBase(p)) {
-                base_locations_.push_back(p);
+                base_locations_[base(p)] = p;
             }
         }
     }
     
-    
-    friend class Board_2;
+    Count CountBases() {
+        Count count = 0;
+        for (auto p : Region(picture_.size())) {
+            if (IsBase(p)) {
+                ++count;
+            }
+        }
+        return count;
+    }
 };
 
 

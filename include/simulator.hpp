@@ -38,8 +38,15 @@ class Simulator {
     
 public:
 
+    Simulator() {}
     Simulator(const Board& board, const TowerManager& tower_manager, const Next& next) 
-        : board_(&board), tower_manager_(&tower_manager) {}
+        : board_(&board), tower_manager_(&tower_manager), next_(&next) {}
+    
+    void Init(const Board& board, const TowerManager& tower_manager, const Next& next) {
+        board_ = &board;
+        tower_manager_ = &tower_manager;
+        next_ = &next;
+    }
     
     void Simulate(vector<Creep>& creeps) {
         creeps_ = &creeps;

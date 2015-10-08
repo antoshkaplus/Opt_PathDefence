@@ -26,11 +26,17 @@ class TowerManager {
     
     vector<TowerPosition> placed_towers_;
     vector<Position> open_tower_positions_;
-    Grid<vector<TowerScope>*> tower_scopes_;
+    // reserve 0 items if road or base
+    Grid<vector<TowerScope>> tower_scopes_;
 
 public:
-    TowerManager(Board& board, const vector<Tower>& towers) 
-        : board_(&board), towers_(&towers) {
+    TowerManager(Board& board, const vector<Tower>& towers) {
+        Init(board, towers);        
+    }
+    
+    void Init(Board& board, const vector<Tower>& towers) {
+        board_ = &board;
+        towers_ = &towers;
         
         const auto& b = *board_; 
         const auto& t = *towers_; 
@@ -41,8 +47,7 @@ public:
         auto func = [&](const Position& p) {
             assert(R.hasInside(p));
             if (b.IsEmpty(p)) {
-                tower_scopes_(p) = new vector<TowerScope>;
-                auto& v = *tower_scopes_(p); 
+                auto& v = tower_scopes_(p); 
                 for (auto i = 0; i < t.size(); ++i) {
                     v.push_back(ComputeTowerScope({i, p}));
                 }
@@ -50,6 +55,10 @@ public:
                 // positions in scope
                 // may also divide good open position and everything else
                 open_tower_positions_.push_back(p);
+            } 
+            else 
+            {
+                tower_scopes_(p).reserve(0);
             }
         };
         R.ForEach(func);
@@ -78,7 +87,7 @@ public:
     }
     
     const TowerScope& tower_scope(const TowerPosition& tp) const {
-        return (*tower_scopes_(tp.position))[tp.tower];
+        return (tower_scopes_(tp.position))[tp.tower];
     }
 
     const Board& board() const {

@@ -84,9 +84,15 @@ class TowerPlacer {
 
 
 public:
-    TowerPlacer(TowerManager& manager, const Next& next) : 
-            tower_manager_(&manager), 
-            current_coverage(manager.board().spawn_loc_count(), 0) {}
+    TowerPlacer(TowerManager& manager, const Next& next) {
+        Init(manager, next);
+    }
+    
+    void Init(TowerManager& manager, const Next& next) {
+        tower_manager_ = &manager; 
+        current_coverage.resize(manager.board().spawn_loc_count());
+        fill(current_coverage.begin(), current_coverage.end(), 0);
+    }
     
     
     // coverage starts with 0-s and it's equal to number of routes
