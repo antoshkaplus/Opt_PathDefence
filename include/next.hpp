@@ -24,6 +24,13 @@ class Next {
     vector<Index> spawn_to_base_;
     const Board* board_;
     
+    // if only I could keep uint_t in each cell of the grid
+    // I could store routes 
+    // and for towers what tower this is
+    
+    // bit index correspond to spawn index
+
+    
 public:
     Next(const Board& board) {
         Init(board);
@@ -69,11 +76,14 @@ public:
         return spawn_to_base_[spawn];
     }
     
-    void check(const Creep& creep) {
+    // returns true if some route were changed
+    bool check(const Creep& creep) {
         auto& cp = current_paths_[creep.spawn];
         if (cp[creep.ticks] != creep.pos) {
             Replace(creep);
+            return true;
         }
+        return false;
     }
     
     Position next(const Creep& creep) const {
