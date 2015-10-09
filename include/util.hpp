@@ -33,16 +33,16 @@ class TowerManager;
 
 
 struct Creep {
-    Index spawn;
     Position pos;
     Index id;
+    Index spawn;
     Count hp;
     // how long stays alive
     Count ticks;
     
     Creep() {}
-    Creep(Index id, Position pos, Count hp, Count ticks = 0)
-    : pos(pos), id(id), hp(hp), ticks(ticks) {}
+    Creep(Index id, Index spawn, Position pos, Count hp, Count ticks = 0)
+    : pos(pos), id(id), spawn(spawn), hp(hp), ticks(ticks) {}
 };
 
 struct Tower {
@@ -55,6 +55,12 @@ struct Tower {
     
     Tower(Count rng, Count dmg, Count cost) 
     : rng(rng), dmg(dmg), cost(cost) {}
+    
+    bool IsInRange(const Position& tower_pos, const Position& pos) const {
+        auto row_diff = tower_pos.row - pos.row;
+        auto col_diff = tower_pos.col - pos.col;
+        return row_diff*row_diff + col_diff*col_diff <= rng*rng;
+    }
 };
 
 struct TowerPosition {

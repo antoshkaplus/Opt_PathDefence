@@ -57,6 +57,7 @@ public:
         while (skip_count_ != creeps.size()) {
             CreepsMove();
             TowersShoot();
+            
         }
     }
     
@@ -69,8 +70,10 @@ private:
         for (auto i = 0; i < cs.size(); ++i) {
             if (skip_[i]) continue;
             cs[i].pos = nt.next(cs[i]);
+            ++cs[i].ticks;
             if (b.IsBase(cs[i].pos)) {
                 skip_[i] = true;
+                ++skip_count_;
             }
         }
     }
@@ -117,6 +120,7 @@ private:
                 cs[i].hp -= dmg;
                 if (cs[i].hp <= 0) {
                     skip_[i] = true;
+                    ++skip_count_;
                 }
                 return true;
             }

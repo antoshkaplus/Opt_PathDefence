@@ -8,23 +8,17 @@
 
 #pragma once
 
-#include "simulator.hpp"
-#include "tower_placer.hpp"
+#include "defender.hpp"
 
 
 class PathDefense {
 
+    Board board_;
+    vector<Tower> towers_;
+    vector<Count> creep_alive_ticks;
+    vector<Index> creep_spawn;    
+    Defender defender_;
     
-
-    Simulator* simulator;
-    Board* board;
-    TowerPlacer* place; 
-    
-    Index iteration = 0;
-    array<Index, MAX_CREEP_COUNT> creep_spawn;
-    Count last_tower_count;
-    vector<double> coverage;
-
     vector<Creep> ConvertToCreeps(const vector<int>& creeps_int) {
         Count N = creeps_int.size()/4;
         vector<Creep> creeps(N);
@@ -33,9 +27,21 @@ class PathDefense {
             // can store just pointers inside Creep structure
             // and take everything by index
             Index id = cc[4*i];
-            creeps[i] = Creep{id, {cc[4*i+3], cc[4*i+2]}, cc[4*i+1]};
+            Position pos = {cc[4*i+3], cc[4*i+2]};
+            Count ticks = creep_alive_ticks[id];
+            if (ticks == 0) creep_spawn[id] = board_.spawn(pos);
+            creeps[i] = Creep{id, creep_spawn[id], pos, cc[4*i+1], ticks};
         }
         return creeps;
+    }
+
+    vector<Tower> ConvertToTowers(const vector<int> tower_type) {
+        vector<Tower> towers;
+        for (int i = 0; i < tower_type.size(); i+=3) {
+            // rng, dmg, cost
+            towers.emplace_back(tower_type[i], tower_type[i+1], tower_type[i+2]);
+        }
+        return towers;
     }
 
     void AddTower(vector<int>& ts, const TowerPosition& tp) {
@@ -46,69 +52,38 @@ class PathDefense {
     
 public:
 
+    PathDefense() {
+        creep_alive_ticks.resize(MAX_CREEP_COUNT, 0);
+        creep_spawn.resize(MAX_CREEP_COUNT);
+    }
+
     int init(vector<string> board, 
              int money, 
              int creep_health, 
              int creep_money, 
              vector<int> tower_type) {
-        fill(creep_spawn.begin(), creep_spawn.end(), -1);
-        vector<Tower> towers;
-        for (int i = 0; i < tower_type.size()/3; ++i) {
-            towers.emplace_back(tower_type[3*i], 
-                                tower_type[3*i+1], 
-                                tower_type[3*i+2]);   
-        }
-        // why we do this shit dynamically???
-        this->board = new Board(board, towers);
-        this->simulator = new Simulator(*(this->board));
-        this->place = new PlaceTower(*(this->board));
-        coverage.resize(this->board->spawn_loc_count(), 0);
+        
+        board_ = Board(board);
+        towers_ = ConvertToTowers(tower_type);
+        defender_.init(board_, towers_, money, creep_health, creep_money);
         return 1;
     }     
     
     vector<int> placeTowers(const vector<int>& creeps_int, 
                             int money, 
                             vector<int>& base_health) {
-        // need to make it smarter
-        int m = *min_element(base_health.begin(), base_health.end());
-        if (m < 400) {
-            return vector<int>();
-        }
-        const auto creeps = ConvertToCreeps(creeps_int);
-        vector<Index> spawns(creeps.size());
-        for (Index i = 0; i < creeps.size(); ++i) {
-            auto& c = creeps[i];
-            if (creep_spawn[c.id] == -1) {
-                creep_spawn[c.id] = board->spawn(c.pos);
-            }
-            spawns[i] = creep_spawn[c.id];
-        }
+        
         vector<int> res;
-        vector<Count> route_hp_break;
-        vector<BreakThrough> break_through;
-        if (iteration == 472) {
-            int r = 0; 
-            ++r;
+        vector<Creep> creeps = ConvertToCreeps(creeps_int);
+        auto tps = defender_.placeTowers(creeps, money, base_health);
+        for (auto& tp : tps) {
+            AddTower(res, tp);
         }
-        while (true) {
-            tie(route_hp_break, break_through) = simulator->Simulate(creeps, spawns);
-            if (!break_through.empty()) {
-                place->Place(route_hp_break, break_through, money);
-            }
-            auto& tt = board->placed_towers();
-            if (last_tower_count == tt.size()) break;
-            for (auto i = last_tower_count; i < tt.size(); ++i) {
-                AddTower(res, tt[i]);
-            }
-            last_tower_count = tt.size();
+        for (auto& c : creeps) {
+            ++creep_alive_ticks[c.id];
         }
-        ++iteration;
         return res;
     }
     
-    ~PathDefense_2() {
-        delete simulator;
-        delete board;
-    }
 };
 

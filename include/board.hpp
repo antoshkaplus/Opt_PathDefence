@@ -29,6 +29,7 @@ class Board {
       
 public:    
     
+    Board() {}
     // this one straight from input
     Board(const vector<string>& b) {
         N = static_cast<Count>(b.size());

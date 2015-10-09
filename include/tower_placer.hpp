@@ -11,19 +11,22 @@
 
 #include "util.hpp"
 #include "tower_manager.hpp"
+#include "coverage.hpp"
 
 // this class is used to determine where to place 
 // new tower
 class TowerPlacer {
 public:
-    TowerPlacer(TowerManager& manager, const Next& next) {
-        Init(manager, next);
+    TowerPlacer() {}
+
+    TowerPlacer(TowerManager& manager, const Next& next, const Coverage& coverage) {
+        Init(manager, next, coverage);
     }
     
-    void Init(TowerManager& manager, const Next& next) {
+    void Init(TowerManager& manager, const Next& next, const Coverage& coverage) {
         tower_manager_ = &manager; 
-        current_coverage.resize(manager.board().spawn_loc_count());
-        fill(current_coverage.begin(), current_coverage.end(), 0);
+        next_ = &next;
+        coverage_ = &coverage;
     }
     
     
@@ -32,16 +35,45 @@ public:
     void Place(const vector<Creep>& creeps, 
                vector<Creep>& after_simulation_creeps,
                Count& money) {
-        // coverage should be computed in another class
-        // should handle query (tower_position, tower)
-        // return coverage for each route
+        
+        auto& mngr = *tower_manager_;
+        auto& b = mngr.board();
+        auto& ts = mngr.towers();
+        auto& cov = *coverage_;
+        
+        vector<int> spawn_hp_break(b.spawn_loc_count(), 0);
+        for (auto& c : after_simulation_creeps) {
+            if (b.IsBase(c.pos)) {
+                spawn_hp_break[c.spawn] += c.hp;
+            }
+        }
+        TowerPosition best_tp;
+        int best_success = 0;
+        for (auto p : mngr.open_tower_positions()) {
+            for (auto t_ind = 0; t_ind < ts.size(); ++t_ind) {
+                auto& t = ts[t_ind];
+                if (t.cost > money) continue;
+                auto c = cov.coverage(p, t_ind);
+                for (auto& v : c) {
+                    v *= t.dmg;
+                }
+                int success = 0;
+                for (auto spawn = 0; spawn < b.spawn_loc_count(); ++spawn) {
+                    success += min<int>(c[spawn], spawn_hp_break[spawn]); 
+                }
+                if (success > best_success) {
+                    best_success = success;
+                    best_tp = TowerPosition{t_ind, p};
+                }
+            }
+        }
+        if (best_success > 0) {
+            mngr.PlaceTower(best_tp);
+        }
     }
     
-    
-    
     TowerManager* tower_manager_;
-    const Next* next_; 
-    vector<double> current_coverage; 
-    
+    const Next* next_;
+    const Coverage* coverage_;
 };
 

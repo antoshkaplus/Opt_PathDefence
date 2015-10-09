@@ -32,6 +32,8 @@ class Next {
 
     
 public:
+    Next() {} 
+
     Next(const Board& board) {
         Init(board);
     }
@@ -40,7 +42,8 @@ public:
         board_ = &board;
         PathFinder pf;
         available_paths_ = pf.FindPaths(board);
-        current_paths_.resize(board_->base_count());
+        current_paths_.resize(board_->spawn_loc_count());
+        spawn_to_base_.resize(board_->spawn_loc_count());
         sort(available_paths_.begin(), available_paths_.end(), [](auto& p_1, auto& p_2) {
             return p_1.size() < p_2.size();
         });
@@ -90,6 +93,11 @@ public:
         auto& cp = current_paths_[creep.spawn];
         return cp[creep.ticks+1];
     }
+    
+    const Path& path(Index spawn) const {
+        return current_paths_[spawn];  
+    }
+    
     
 private:
     void Replace(const Creep& creep) {

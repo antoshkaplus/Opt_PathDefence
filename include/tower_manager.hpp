@@ -30,6 +30,8 @@ class TowerManager {
     Grid<vector<TowerScope>> tower_scopes_;
 
 public:
+    TowerManager() {}
+
     TowerManager(Board& board, const vector<Tower>& towers) {
         Init(board, towers);        
     }

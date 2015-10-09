@@ -21,7 +21,7 @@ class PathFinder {
     
 public:
     PathFinder() {
-        fill(dir_avail.begin(), dir_avail.end(), false);
+        fill(dir_avail.begin(), dir_avail.end(), true);
     }
     
     vector<Path> FindPaths(const Board& board) {
@@ -44,17 +44,17 @@ private:
         } else {
             for (auto dir = 0; dir < kDirCount; ++dir) {
                 auto vis = dir_avail[dir];
-                if (vis) continue;
+                if (!vis) continue;
                 p.Shift(dir);
                 auto opp = kDirOpposite[dir];
                 if (board_->IsInside(p) && (board_->IsRoad(p) || board_->IsBase(p))) {
                     auto opp_vis = dir_avail[opp];
-                    if (!opp_vis) {
-                        dir_avail[opp] = true;
+                    if (opp_vis) {
+                        dir_avail[opp] = false;
                     }
                     FindPathsRecursion(p);
-                    if (!opp_vis) {
-                        dir_avail[opp] = false;
+                    if (opp_vis) {
+                        dir_avail[opp] = true;
                     }
                 }
                 p.Shift(opp);

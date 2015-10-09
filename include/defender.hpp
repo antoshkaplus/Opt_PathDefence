@@ -19,16 +19,15 @@ class Defender {
     Next next_;
     TowerManager tower_manager_;
     Simulator simulator_;
+    Coverage coverage_;
     // this should be something like strategy
     // better use polymorphysm
     TowerPlacer tower_placer_; 
-    
-    Index iteration = 0;
         
 public:
     
     int init(Board& board, 
-             const vector<Tower> towers,
+             const vector<Tower>& towers,
              int money, 
              int creep_health, 
              int creep_money) {
@@ -37,7 +36,8 @@ public:
         next_.Init(board);
         tower_manager_.Init(board, towers);
         simulator_.Init(board, tower_manager_, next_);
-        tower_placer_.Init(tower_manager_, next_);
+        coverage_.Init(board, tower_manager_, next_);
+        tower_placer_.Init(tower_manager_, next_, coverage_);
         
         return 1;
     }     
@@ -53,8 +53,8 @@ public:
             // should check how old code worked probably
             simulator_.Simulate(sim_creeps);
             tower_placer_.Place(creeps, sim_creeps, money);
+            break;
         }
-        ++iteration;
         return {placed_towers.begin()+tower_count, placed_towers.end()};
     }
 };
