@@ -49,20 +49,28 @@ public:
         }
         TowerPosition best_tp;
         int best_success = 0;
+        int best_total_c = 0;
+        bool best_initialized = false;
         for (auto p : mngr.open_tower_positions()) {
             for (auto t_ind = 0; t_ind < ts.size(); ++t_ind) {
                 auto& t = ts[t_ind];
                 if (t.cost > money) continue;
                 auto c = cov.coverage(p, t_ind);
+                auto total_c = 0;
                 for (auto& v : c) {
                     v *= t.dmg;
+                    total_c += v;
                 }
                 int success = 0;
                 for (auto spawn = 0; spawn < b.spawn_loc_count(); ++spawn) {
                     success += min<int>(c[spawn], spawn_hp_break[spawn]); 
                 }
-                if (success > best_success) {
+                //if (success > best_success) {
+                if (!best_initialized || success* (1.L*ts[t_ind].dmg/ts[t_ind].cost) > best_success* (1.L*ts[best_tp.tower].dmg/ts[best_tp.tower].cost) 
+                        || (success* (1.L*ts[t_ind].dmg/ts[t_ind].cost) == best_success* (1.L*ts[best_tp.tower].dmg/ts[best_tp.tower].cost) && total_c > best_total_c)) {
+                    best_initialized = true;
                     best_success = success;
+                    best_total_c = total_c;
                     best_tp = TowerPosition{t_ind, p};
                 }
             }

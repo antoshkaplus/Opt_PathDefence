@@ -67,9 +67,11 @@ private:
         auto& cs = *creeps_;
         auto& nt = *next_;
         auto& b = *board_;
+        creep_positioning_.clear();
         for (auto i = 0; i < cs.size(); ++i) {
             if (skip_[i]) continue;
             cs[i].pos = nt.next(cs[i]);
+            creep_positioning_.emplace(cs[i].pos, i);
             ++cs[i].ticks;
             if (b.IsBase(cs[i].pos)) {
                 skip_[i] = true;

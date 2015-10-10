@@ -11,3 +11,6 @@ ideas:
   * best (greedy):
 
     Each time choose tower that has: maximum coverage of broken routes
+
+  WARNING:
+    Problem was not understood correctly. We build paths from spawn to base. But creep chooses direction he goes at each location.
