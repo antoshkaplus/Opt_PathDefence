@@ -14,7 +14,7 @@
 #include <fstream>
 #include <array>
 #include <queue>
-
+#include <unordered_map>
 
 #include "ant/core/core.hpp"
 #include "ant/geometry/d2.hpp"
@@ -85,6 +85,8 @@ struct MazeBreakThrough {
     // first: where creep started, last: creep hits base
     Path path;
     Count hp;
+    
+    MazeBreakThrough() {}
     
     MazeBreakThrough(Count hp, const Path& path) 
     : path(path), hp(hp) {}

@@ -15,11 +15,14 @@ class MazeSimulator {
 
     struct Shadow {
         Count hp;
+        Index id;
         Position pos;
         Index prev;
         
-        Shadow(Count hp, const Position& pos, Index prev) 
-        : hp(hp), pos(pos), prev(prev) {}
+        Shadow() {}
+        
+        Shadow(Index id, Count hp, const Position& pos, Index prev) 
+        : hp(hp), id(id), pos(pos), prev(prev) {}
     };
     
     
@@ -29,6 +32,7 @@ class MazeSimulator {
     vector<Shadow> history_;
     vector<Shadow> current_;
 
+    vector<MazeBreakThrough> break_through_;
 
 public:
     void Init(const Maze& maze, const TowerManager& tower_manager) {
@@ -40,6 +44,7 @@ public:
     void Simulate(const vector<Creep>& creeps, const vector<Position>& prev_locs) {
         history_.clear();
         current_.clear();
+        break_through_.clear();
         
         auto& b = tower_manager_->board(); 
         Init(creeps, prev_locs);
@@ -49,22 +54,36 @@ public:
         }
         for (auto& h : history_) {
             if (b.IsBase(h.pos)) {
-                int i = 0; ++i;
+                // should make history
+                Path path;
+                auto s = h;
+                while (true) {
+                    path.push_back(s.pos);
+                    if (s.prev == -1) {
+                        break;
+                    }
+                    s = history_[s.prev];
+                }
+                break_through_.emplace_back(h.hp, path);
             }
         }
-        
     }
    
+    const vector<MazeBreakThrough>& break_through() const {
+        return break_through_;
+    }
+    
+    
     
 private:
     void Init(const vector<Creep>& creeps, const vector<Position>& prev_locs) {
         for (auto i = 0; i < creeps.size(); ++i) {
             auto& c = creeps[i];
-            history_.emplace_back(c.hp, prev_locs[i], -1);
+            history_.emplace_back(c.id, c.hp, prev_locs[i], -1);
         }
         auto i = 0;
         for (auto& c : creeps) {
-            current_.emplace_back(c.hp, c.pos, i);
+            current_.emplace_back(c.id, c.hp, c.pos, i);
             ++i;
         }    
     }
@@ -82,7 +101,7 @@ private:
                 if (!dirs[i]) continue;
                 auto p = c.pos;
                 p.Shift(i);
-                next.emplace_back(c.hp*shadow_strength_/C, p, offset + c_i);
+                next.emplace_back(c.id, c.hp*shadow_strength_/C, p, offset + c_i);
             }
             ++c_i;
         }
@@ -112,9 +131,9 @@ private:
                     }
                 }
                 // now we have array of minions on equal distance
-//                sort(inds.begin(), inds.end(), [&] (Index i_0, Index i_1) {
-//                    return cs[i_0].id < cs[i_1].id;
-//                });
+                sort(inds.begin(), inds.end(), [&] (Index i_0, Index i_1) {
+                    return current_[i_0].id < current_[i_1].id;
+                });
                 if (ShootAliveCreep(inds, ts[pt.tower].dmg)) {
                     break;
                 }

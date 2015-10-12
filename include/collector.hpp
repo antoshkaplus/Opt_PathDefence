@@ -21,6 +21,7 @@ class Collector : public Strategy {
     Maze maze_;
     TowerManager tower_manager_;
     MazeSimulator simulator_;
+    MazeTowerPlacer tower_placer_;
     
     const Board* board_;
     
@@ -40,6 +41,7 @@ public:
         iteration = 0;
         crossroads_.open(output_path + "crossroards.txt");
         tower_manager_.Init(board, towers);
+        tower_placer_.Init(tower_manager_);
         simulator_.Init(maze_, tower_manager_);
         return 1;
     }
@@ -83,12 +85,14 @@ public:
             b.ForEachNearby(p.second.pos, op);
         }
         
-        
-        simulator_.Simulate(creeps, creep_prev_vec);
-        
-        
-        
-        
+        auto& placed_towers = tower_manager_.placed_towers();
+        Count tower_count = placed_towers.size();
+        Index iteration = 0;
+        while (++iteration < 10) {
+            simulator_.Simulate(creeps, creep_prev_vec);
+            if (simulator_.break_through().empty()) break;
+            tower_placer_.Place(simulator_.break_through(), money);
+        }
         ++iteration;
         if (iteration == TICK_COUNT) {
             auto& b = *board_;
@@ -108,7 +112,7 @@ public:
         for (auto& c : creeps) {
             creep_prev_[c.id] = c;
         }
-        return vector<TowerPosition>();
+        return {placed_towers.begin()+tower_count, placed_towers.end()};
     }
 
 };

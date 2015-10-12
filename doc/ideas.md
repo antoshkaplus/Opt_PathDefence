@@ -14,3 +14,14 @@ ideas:
 
   WARNING:
     Problem was not understood correctly. We build paths from spawn to base. But creep chooses direction he goes at each location.
+
+* maze strategy:
+  * formula to decide which tower to use in situation
+    * cost
+    * which positions cover (routes|quantity)
+      * count number of routes under fire (id spawn + id base)
+      * covering multiple spawns (against waves is good)
+      * total scope - bigger better
+      * setting up parameters
+    * dmg
+  * shadow strength parameter
