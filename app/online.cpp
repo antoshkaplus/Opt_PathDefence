@@ -1,5 +1,7 @@
 
 #include "path_defence.hpp"
+#include "collector.hpp"
+#include "maze_simulator.hpp"
 
 
 // expecting to be run from bin

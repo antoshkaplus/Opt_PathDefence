@@ -10,8 +10,9 @@
 
 #include "simulator.hpp"
 #include "tower_placer.hpp"
+#include "strategy.hpp"
 
-class Defender {
+class Defender : public Strategy {
     
     Board* board_;
     
@@ -30,7 +31,7 @@ public:
              const vector<Tower>& towers,
              int money, 
              int creep_health, 
-             int creep_money) {
+             int creep_money) override {
         
         board_ = &board;
         next_.Init(board);
@@ -45,7 +46,7 @@ public:
     // returns indices of towers that were placed
     vector<TowerPosition> placeTowers(const vector<Creep>& creeps, 
                               int money, 
-                              vector<Count>& base_health) {
+                              vector<Count>& base_health) override {
         auto sim_creeps = creeps;
         auto& placed_towers = tower_manager_.placed_towers();
         auto tower_count = placed_towers.size();

@@ -11,6 +11,9 @@
 #include "util.hpp"
 #include "path_finder.hpp"
 
+
+// thinking that from spawn goes directly to single base
+// this is not true
 class Next {
     
     using VecPath = vector<Path>; 

@@ -9,6 +9,7 @@
 #pragma once
 
 #include "defender.hpp"
+#include "collector.hpp"
 
 
 class PathDefense {
@@ -17,7 +18,7 @@ class PathDefense {
     vector<Tower> towers_;
     vector<Count> creep_alive_ticks;
     vector<Index> creep_spawn;    
-    Defender defender_;
+    Collector defender_;
     
     vector<Creep> ConvertToCreeps(const vector<int>& creeps_int) {
         Count N = creeps_int.size()/4;

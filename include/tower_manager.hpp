@@ -97,6 +97,17 @@ public:
     }
     
     
+    // can do another one that is const probably later
+    template<class Operation>
+    void ForEachOpenTowerPosition(Operation& op) {
+        for (auto p : open_tower_positions()) {
+            for (auto t_ind = 0; t_ind < towers().size(); ++t_ind) {
+                op(TowerPosition{t_ind, p});
+            }
+        }
+    }
+    
+    
 private:
 
     

@@ -39,7 +39,7 @@ public:
     }
     
     template<class Process>
-    void ForEachNearby(const Position& t, Process& proc) {
+    void ForEachNearby(const Position& t, Process& proc) const {
         if (t.row > 0) {
             proc(t+Indent{-1, 0});
         }

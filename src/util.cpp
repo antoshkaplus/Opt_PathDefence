@@ -13,6 +13,8 @@
 //vector<Position> open_tower_positions;
 //vector<double> coverage;
 
+const string output_path = "../output/";
+
 struct Score {
     double min;
     Count zeros;

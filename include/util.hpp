@@ -81,6 +81,16 @@ struct BreakThrough {
         : cur_loc(loc), spawn_loc(spawn) {}
 };
 
+struct MazeBreakThrough {
+    // first: where creep started, last: creep hits base
+    Path path;
+    Count hp;
+    
+    MazeBreakThrough(Count hp, const Path& path) 
+    : path(path), hp(hp) {}
+};
+
+
 constexpr Count MAX_CREEP_COUNT = 2000;
 constexpr Count TICK_COUNT = 2000;
 constexpr Count HP_INCREASE_PERIOD = 500;
@@ -98,6 +108,7 @@ constexpr char CELL_BASE = 'b';
 //using Board = Grid<char>;
 
 
+extern const string output_path;
 
 vector<double> ComputeCoverage(const TowerManager& b, const TowerPosition& tp);
 

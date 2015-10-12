@@ -54,6 +54,10 @@ public:
     const vector<double>& coverage(const Position& pos, Index tower_index) const {
         return coverage_[pos][tower_index]; 
     } 
+    
+    const vector<double>& coverage(const TowerPosition& tp) const {
+        return coverage(tp.position, tp.tower);
+    }
 
     void Recompute(Index spawn) {
         auto& b = *board_;
