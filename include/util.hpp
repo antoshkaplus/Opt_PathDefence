@@ -85,6 +85,7 @@ struct MazeBreakThrough {
     // first: where creep started, last: creep hits base
     Path path;
     Count hp;
+    Index id;
     
     MazeBreakThrough() {}
     

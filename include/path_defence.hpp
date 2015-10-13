@@ -18,7 +18,7 @@ class PathDefense {
     vector<Tower> towers_;
     vector<Count> creep_alive_ticks;
     vector<Index> creep_spawn;    
-    Collector defender_;
+    unique_ptr<Strategy> strategy_;
     
     vector<Creep> ConvertToCreeps(const vector<int>& creeps_int) {
         Count N = creeps_int.size()/4;
@@ -54,8 +54,14 @@ class PathDefense {
 public:
 
     PathDefense() {
+        strategy_ = make_unique<Collector>();
         creep_alive_ticks.resize(MAX_CREEP_COUNT, 0);
         creep_spawn.resize(MAX_CREEP_COUNT);
+    }
+
+
+    void set_strategy(unique_ptr<Strategy> strategy) {
+        strategy_ = move(strategy);
     }
 
     int init(vector<string> board, 
@@ -66,7 +72,7 @@ public:
         
         board_ = Board(board);
         towers_ = ConvertToTowers(tower_type);
-        defender_.init(board_, towers_, money, creep_health, creep_money);
+        strategy_->init(board_, towers_, money, creep_health, creep_money);
         return 1;
     }     
     
@@ -76,7 +82,7 @@ public:
         
         vector<int> res;
         vector<Creep> creeps = ConvertToCreeps(creeps_int);
-        auto tps = defender_.placeTowers(creeps, money, base_health);
+        auto tps = strategy_->placeTowers(creeps, money, base_health);
         for (auto& tp : tps) {
             AddTower(res, tp);
         }

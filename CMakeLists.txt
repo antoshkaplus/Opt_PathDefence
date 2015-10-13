@@ -45,8 +45,8 @@ include_directories("/usr/include")
 include_directories("./include")
 
 find_library(ANT_LIBRARY ant)
-if (NOT ANT_LIBRARY) 
-    message(FATAL_ERROR "ant library not found")    
+if (NOT ANT_LIBRARY)
+    message(FATAL_ERROR "ant library not found")
 endif()
 
 file(GLOB PATH_DEFENCE_FILES "./src/*" "./include/*")
@@ -59,9 +59,5 @@ target_link_libraries(path_defence_offline path_defence)
 add_executable(path_defence_online "./app/online.cpp")
 target_link_libraries(path_defence_online path_defence)
 
-
-
-
-
-
-
+add_executable(path_defence_online_param_setting "./app/online_param_setting.cpp")
+target_link_libraries(path_defence_online_param_setting path_defence)

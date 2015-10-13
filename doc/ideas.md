@@ -21,6 +21,7 @@ ideas:
     * which positions cover (routes|quantity)
       * count number of routes under fire (id spawn + id base)
       * covering multiple spawns (against waves is good)
+      * covering multiple bases
       * total scope - bigger better
       * setting up parameters
     * dmg

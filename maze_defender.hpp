@@ -1,10 +1,11 @@
 //
-//  collector.hpp
+//  maze_defender.hpp
 //  PathDefence
 //
-//  Created by Anton Logunov on 10/11/15.
+//  Created by Anton Logunov on 10/12/15.
 //
 //
+
 
 #pragma once
 
@@ -15,9 +16,8 @@
 #include "maze_tower_placer.hpp"
 
 
-class Collector : public Strategy {
-
-
+class MazeDefender : public Strategy {
+    
     Maze maze_;
     TowerManager tower_manager_;
     MazeSimulator simulator_;
@@ -30,26 +30,26 @@ class Collector : public Strategy {
     map<Index, Creep> creep_prev_;
     
     
-public:
+    public:
     int init(Board& board, 
-                     const vector<Tower>& towers,
-                     int money, 
-                     int creep_health, 
-                     int creep_money) override {
+             const vector<Tower>& towers,
+             int money, 
+             int creep_health, 
+             int creep_money) override {
         
         board_ = &board;
         iteration = 0;
         crossroads_.open(output_path + "crossroards.txt");
         tower_manager_.Init(board, towers);
-        tower_placer_.Init(board, tower_manager_);
+        tower_placer_.Init(tower_manager_);
         simulator_.Init(maze_, tower_manager_);
         return 1;
     }
     
     // returns indices of towers that were placed
     vector<TowerPosition> placeTowers(const vector<Creep>& creeps, 
-                                              int money, 
-                                              vector<Count>& base_health) override {
+                                      int money, 
+                                      vector<Count>& base_health) override {
         auto N = board_->size(); 
         vector<Position> creep_prev_vec;
         for (auto& c : creeps) {
@@ -103,16 +103,16 @@ public:
                     Count cc = count(ds.begin(), ds.end(), true);
                     if (cc == 1) continue;
                     crossroads_ << "row: " << p.row << ", col: " << p.col << ", how many: " << cc << endl;  
-                }
-            }
-            crossroads_.close();
-        }
-        
-        creep_prev_.clear();
-        for (auto& c : creeps) {
-            creep_prev_[c.id] = c;
-        }
-        return {placed_towers.begin()+tower_count, placed_towers.end()};
-    }
-
-};
+                    }
+                    }
+                    crossroads_.close();
+                    }
+                    
+                    creep_prev_.clear();
+                    for (auto& c : creeps) {
+                        creep_prev_[c.id] = c;
+                    }
+                    return {placed_towers.begin()+tower_count, placed_towers.end()};
+                    }
+                    
+                    };
