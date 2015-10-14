@@ -9,7 +9,7 @@
 #pragma once
 
 #include "defender.hpp"
-#include "collector.hpp"
+#include "maze_defender.hpp"
 
 
 class PathDefense {
@@ -54,7 +54,7 @@ class PathDefense {
 public:
 
     PathDefense() {
-        strategy_ = make_unique<Collector>();
+        strategy_ = make_unique<MazeDefender>();
         creep_alive_ticks.resize(MAX_CREEP_COUNT, 0);
         creep_spawn.resize(MAX_CREEP_COUNT);
     }

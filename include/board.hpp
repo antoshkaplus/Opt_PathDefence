@@ -54,6 +54,22 @@ public:
         }
     }
     
+    template<class Process>
+    void ForEachNearby_PassDir(const Position& t, Process& proc) const {
+        if (t.row > 0) {
+            proc(t+Indent{-1, 0}, kDirDown);
+        }
+        if (t.row < N-1) {
+            proc(t+Indent{ 1, 0}, kDirUp);
+        }
+        if (t.col > 0) {
+            proc(t+Indent{ 0,-1}, kDirRight);
+        }
+        if (t.col < N-1) {
+            proc(t+Indent{ 0, 1}, kDirLeft);
+        }
+    }
+    
     bool IsBaseNearby(const Position& t) {
         bool b = false;
         auto func = [&](const Position& p) {

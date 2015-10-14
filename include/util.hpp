@@ -98,6 +98,8 @@ constexpr Count MAX_CREEP_COUNT = 2000;
 constexpr Count TICK_COUNT = 2000;
 constexpr Count HP_INCREASE_PERIOD = 500;
 constexpr Count MAX_BASE_COUNT = 8;
+constexpr Count MIN_MAP_SIZE = 20;
+constexpr Count MAX_MAP_SIZE = 60;
 
 // after we place a tower we will add "*" in that place
 // '.' - road

@@ -41,8 +41,9 @@ class MazeDefender : public Strategy {
         iteration = 0;
         crossroads_.open(output_path + "crossroards.txt");
         tower_manager_.Init(board, towers);
-        tower_placer_.Init(tower_manager_);
+        tower_placer_.Init(board, tower_manager_);
         simulator_.Init(maze_, tower_manager_);
+        maze_.Deduct(board);
         return 1;
     }
     

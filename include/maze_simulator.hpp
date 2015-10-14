@@ -48,7 +48,10 @@ public:
         
         auto& b = tower_manager_->board(); 
         Init(creeps, prev_locs);
-        while (!current_.empty()) {
+        Index iteration = 0;
+        Count sz = b.size();
+        // one of the condition is against looping shadows
+        while (!current_.empty() && ++iteration != 3*sz) {
             MoveShadows();
             ShootTowers();
         }
@@ -93,17 +96,22 @@ private:
         auto& m = *maze_; 
         auto& b = tower_manager_->board();
         Count offset = history_.size();
-        int c_i = 0;
+        int c_i = -1;
         for (auto& c : current_) {
+            ++c_i;
             auto dirs = m.Next(c.pos, history_[c.prev].pos);
             auto C = count(dirs.begin(), dirs.end(), true);
+            // may start circling. one helpful technique against circling
+            if (C > 1 && c.hp == 1) continue;
             for (auto i = 0; i < kDirCount; ++i) {
                 if (!dirs[i]) continue;
                 auto p = c.pos;
                 p.Shift(i);
-                next.emplace_back(c.id, c.hp*shadow_strength_/C, p, offset + c_i);
+                // don't really know about it. probably should just have 
+                // float values here or maybe not
+                Count hp = ceil(c.hp*shadow_strength_/C);
+                next.emplace_back(c.id, hp, p, offset + c_i);
             }
-            ++c_i;
         }
         history_.insert(history_.end(), current_.begin(), current_.end());
         auto rem_start = remove_if(next.begin(), next.end(), [&](const Shadow& s) {
@@ -146,7 +154,9 @@ private:
     }
 
     bool ShootAliveCreep(const vector<Index>& creep_indices, Count dmg) {
-        for (auto i : creep_indices) {
+        // could also try to reduce shadow if in range
+        for (auto k = 0; k < creep_indices.size(); ++k) {
+            auto i = creep_indices[k]; 
             if (current_[i].hp > 0) {
                 current_[i].hp -= dmg;
                 return true;
