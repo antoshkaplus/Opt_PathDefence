@@ -76,25 +76,93 @@ class Maze {
             }
         }
         
-        void DeductFromSpawn(const Position& p, grid::Direction dir) {
+        struct CrossroadDeduction {
+            Position next;
+            bool success;
+        };
+        
+        CrossroadDeduction DeductCroossroadFromSpawn(const Position& pos, grid::Direction dir) {
+            CrossroadDeduction res;
+            auto& m = *maze_;
+            // has something that goes out?
+            if (m.IsInitialized(pos)) {
+                // have nothing to do
+                res.success = false;
+                return res;
+            }
+            auto next_dir = -1;
+            Count in_count = 0;
+            for (auto d = 0; d < kDirCount; ++d) {
+                if (d == dir) continue; 
+                auto from = pos + kDirVector[d]; 
+                auto exists = m.Next(from)[kDirOpposite[d]];
+                if (exists) {
+                    ++in_count;
+                } else {
+                    next_dir = d;
+                }
+            }
+            Possible possible = PossibleDirections(pos, dir);
+            if (possible.count != in_count + 1) {
+                // to many possible directions out
+                // should be only one
+                res.success = false;
+                return res;
+            } 
+            res.next = pos.Shifted(next_dir);
+            res.success = true;  
+            return res;
+        }
+        
+        
+        struct Possible {
+            Direction dirs;
+            Count count;
+        };
+        
+        Possible PossibleDirections(const Position& pos, grid::Direction dir) {
+            auto& b = *board_;
+            Possible res;
+            res.count = 0;
+            for (auto d = 0; d < kDirCount; ++d) {
+                res.dirs[d] = false;
+                if (d == dir) continue;
+                auto sh = pos.Shifted(d);
+                if (b.IsInside(sh) && (b.IsRoad(sh) || b.IsBase(sh))) {
+                    ++res.count;
+                    res.dirs[d] = true;
+                }
+            }
+            return res;
+        }
+        
+        void DeductFromSpawn(const Position& pos, grid::Direction dir) {
             auto& b = *board_;
             
             path_.push_back(pos);
+            if (b.IsBase(pos)) {
+                return;
+            }
             
             Count n = 0;
             Position next;
             for (auto d = 0; d < kDirCount; ++d) {
                 if (d == dir) continue;
                 auto sh = pos.Shifted(d);
-                if (b.IsInside(sh) && b.IsRoad(sh)) {
+                if (b.IsInside(sh) && (b.IsRoad(sh) || b.IsBase(sh))) {
                     ++n;
                     next = sh;
                 }
             }
-            if (n != 1) {
-                return;   
+            assert(n != 0);
+            if (n > 1) {
+                auto deduction = DeductCroossroadFromSpawn(pos, dir);
+                if (!deduction.success) {
+                    return;   
+                } 
+                next = deduction.next;
             }
-            DeductFromBase(next, FromDirVector(pos - next));
+            DeductFromSpawn(next, FromDirVector(pos - next));
         }
         
         
@@ -108,7 +176,7 @@ class Maze {
             if (c == 1) return;
             path_.clear();
             path_.push_back(p);
-            Deduct(p.Shifted(kDirOpposite[d]), d);
+            DeductFromSpawn(p, -1);
             for (auto i = 1; i < path_.size(); ++i) {
                 m.CheckIn(path_[i], path_[i-1]);
             }
@@ -189,12 +257,19 @@ public:
         return it->second;
     }
     
+    // excluding direction to previous position
     const Direction Next(const Position& pos, const Position& prev) const {
         Direction res = Next(pos);
         auto back_dir = FromDirVector(prev-pos);
         res[back_dir] = false;
         return res;
     }
+    
+    bool IsInitialized(const Position& pos) const {
+        return avail_next_.find(pos) != avail_next_.end();
+    }
+    
+    
 
 private:
     
