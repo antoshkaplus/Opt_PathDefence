@@ -49,6 +49,8 @@ if (NOT ANT_LIBRARY)
     message(FATAL_ERROR "ant library not found")
 endif()
 
+# names of executables should be caps
+
 file(GLOB PATH_DEFENCE_FILES "./src/*" "./include/*")
 add_library(path_defence ${PATH_DEFENCE_FILES})
 target_link_libraries(path_defence ${ANT_LIBRARY})
@@ -61,3 +63,11 @@ target_link_libraries(path_defence_online path_defence)
 
 add_executable(path_defence_online_param_setting "./app/online_param_setting.cpp")
 target_link_libraries(path_defence_online_param_setting path_defence)
+
+find_library(GTEST_LIB gtest)
+if (NOT GTEST_LIB)
+    message(FATAL_ERROR "gtest library not found")
+endif()
+
+add_executable(path_defence_test "./app/test.cpp")
+target_link_libraries(path_defence_test path_defence ${GTEST_LIB} )

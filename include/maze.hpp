@@ -9,6 +9,7 @@
 #pragma once
 
 #include "util.hpp"
+#include "board.hpp"
 
 
 class Maze {
