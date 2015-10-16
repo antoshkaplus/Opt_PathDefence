@@ -93,8 +93,9 @@ class Maze {
             }
             auto next_dir = -1;
             Count in_count = 0;
+            Possible possible = PossibleDirections(pos, dir);
             for (auto d = 0; d < kDirCount; ++d) {
-                if (d == dir) continue; 
+                if (!possible.dirs[d]) continue;
                 auto from = pos + kDirVector[d]; 
                 auto exists = m.Next(from)[kDirOpposite[d]];
                 if (exists) {
@@ -103,7 +104,6 @@ class Maze {
                     next_dir = d;
                 }
             }
-            Possible possible = PossibleDirections(pos, dir);
             if (possible.count != in_count + 1) {
                 // to many possible directions out
                 // should be only one
@@ -172,11 +172,10 @@ class Maze {
             
             auto nn = m.Next(p);
             auto c = count(nn.begin(), nn.end(), true);
-            assert(c > 1);
+            assert(c <= 1);
             // deduction found from base
             if (c == 1) return;
             path_.clear();
-            path_.push_back(p);
             DeductFromSpawn(p, -1);
             for (auto i = 1; i < path_.size(); ++i) {
                 m.CheckIn(path_[i], path_[i-1]);
@@ -241,6 +240,7 @@ public:
     
     void CheckIn(const Position& pos, const Position& prev) {
         auto d = FromDirVector(pos - prev);
+        assert(d >= 0 && d < 4);
         auto it = avail_next_.find(prev);
         if (it == avail_next_.end()) {
             Direction ds = {{false, false, false, false}};
@@ -270,7 +270,33 @@ public:
         return avail_next_.find(pos) != avail_next_.end();
     }
     
-    
+    void Print(ostream& out) {
+        Position pos;
+        Direction dir; 
+        out << "Maze:" << endl;
+        using T = tuple<Position,Position>;
+        vector<T> vs;
+        for (auto& next : avail_next_) {
+            tie(pos, dir) = next;
+            for (auto d : kDirections) {
+                if (!dir[d]) continue;
+                vs.emplace_back(pos, pos + kDirVector[d]);
+            }
+        }
+        Position::TopLeftComparator comp;
+        sort(vs.begin(), vs.end(), [&](T& t_0, T& t_1) {
+            auto& p_0 = get<0>(t_0);
+            auto& p_1 = get<0>(t_1);
+            return comp(p_0, p_1);
+        });
+        for (auto t : vs) {
+            auto& p_0 = get<0>(t);
+            auto& p_1 = get<1>(t);
+            out << p_0.row << ", " << p_0.col << " => " << p_1.row << ", " << p_1.col << endl;
+            
+        }
+        out << endl << endl;
+    }
 
 private:
     

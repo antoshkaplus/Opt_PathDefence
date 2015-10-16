@@ -26,3 +26,8 @@ ideas:
       * setting up parameters
     * dmg
   * shadow strength parameter
+
+* have multiple criteria for placing towers
+    pick overall (better for overall board)
+    best instead of best for current
+    iteration if we are able to kill current creeps anyway

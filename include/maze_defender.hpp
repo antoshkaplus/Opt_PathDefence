@@ -26,7 +26,7 @@ class MazeDefender : public Strategy {
     const Board* board_;
     
     ofstream crossroads_;
-    Index iteration;
+    Index iteration_;
     map<Index, Creep> creep_prev_;
     
     
@@ -38,7 +38,7 @@ class MazeDefender : public Strategy {
              int creep_money) override {
         
         board_ = &board;
-        iteration = 0;
+        iteration_ = 0;
         crossroads_.open(output_path + "crossroards.txt");
         tower_manager_.Init(board, towers);
         tower_placer_.Init(board, tower_manager_);
@@ -94,6 +94,10 @@ class MazeDefender : public Strategy {
             if (simulator_.break_through().empty()) break;
             tower_placer_.Place(simulator_.break_through(), money);
         }
+        if (!simulator_.break_through().empty()) {
+            cerr << "Warning! Not all creeps killed!";
+        }
+        
         ++iteration;
         if (iteration == TICK_COUNT) {
             auto& b = *board_;
@@ -104,16 +108,23 @@ class MazeDefender : public Strategy {
                     Count cc = count(ds.begin(), ds.end(), true);
                     if (cc == 1) continue;
                     crossroads_ << "row: " << p.row << ", col: " << p.col << ", how many: " << cc << endl;  
-                    }
-                    }
-                    crossroads_.close();
-                    }
-                    
-                    creep_prev_.clear();
-                    for (auto& c : creeps) {
-                        creep_prev_[c.id] = c;
-                    }
-                    return {placed_towers.begin()+tower_count, placed_towers.end()};
-                    }
-                    
-                    };
+                }
+            }
+            crossroads_.close();
+        }
+        
+        creep_prev_.clear();
+        for (auto& c : creeps) {
+            creep_prev_[c.id] = c;
+        }
+        
+        
+        ++iteration_;
+        if (iteration_ == 30) {
+            ofstream out("../output/maze.txt");
+            maze_.Print(out);
+        }
+        return {placed_towers.begin()+tower_count, placed_towers.end()};
+    }
+        
+};
