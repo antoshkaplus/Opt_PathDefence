@@ -25,7 +25,9 @@ class MazeDefender : public Strategy {
     
     const Board* board_;
     
-    ofstream crossroads_;
+    ofstream out_crossroads_;
+    ofstream out_creep_count_; 
+    
     Index iteration_;
     map<Index, Creep> creep_prev_;
     
@@ -39,7 +41,8 @@ class MazeDefender : public Strategy {
         
         board_ = &board;
         iteration_ = 0;
-        crossroads_.open(output_path + "crossroards.txt");
+        out_crossroads_.open(output_path + "crossroards.txt");
+        out_creep_count_.open(output_path + "creep_count.txt");
         tower_manager_.Init(board, towers);
         tower_placer_.Init(board, tower_manager_);
         simulator_.Init(maze_, tower_manager_);
@@ -51,6 +54,8 @@ class MazeDefender : public Strategy {
     vector<TowerPosition> placeTowers(const vector<Creep>& creeps, 
                                       int money, 
                                       vector<Count>& base_health) override {
+        out_creep_count_ << iteration_ << " : " << creeps.size() << endl;
+        
         auto N = board_->size(); 
         vector<Position> creep_prev_vec;
         for (auto& c : creeps) {
@@ -107,10 +112,10 @@ class MazeDefender : public Strategy {
                     auto& ds = maze_.Next(p);
                     Count cc = count(ds.begin(), ds.end(), true);
                     if (cc == 1) continue;
-                    crossroads_ << "row: " << p.row << ", col: " << p.col << ", how many: " << cc << endl;  
+                    out_crossroads_ << "row: " << p.row << ", col: " << p.col << ", how many: " << cc << endl;  
                 }
             }
-            crossroads_.close();
+            out_crossroads_.close();
         }
         
         creep_prev_.clear();

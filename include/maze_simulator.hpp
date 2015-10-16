@@ -10,6 +10,7 @@
 
 #include "util.hpp"
 #include "maze.hpp"
+#include "tower_manager.hpp"
 
 class MazeSimulator {
 
