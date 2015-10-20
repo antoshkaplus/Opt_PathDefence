@@ -14,6 +14,7 @@
 #include "util.hpp"
 #include "maze_simulator.hpp"
 #include "maze_tower_placer.hpp"
+#include "maze_routes.hpp"
 
 
 class MazeDefender : public Strategy {
@@ -22,6 +23,7 @@ class MazeDefender : public Strategy {
     TowerManager tower_manager_;
     MazeSimulator simulator_;
     MazeTowerPlacer tower_placer_;
+    MazeRoutes routes_;
     
     const Board* board_;
     
@@ -96,6 +98,9 @@ class MazeDefender : public Strategy {
         Index iteration = 0;
         while (++iteration < 10) {
             simulator_.Simulate(creeps, creep_prev_vec);
+            if (iteration == 0) {
+                CheckInRoutes(simulator_.break_through());
+            } 
             if (simulator_.break_through().empty()) break;
             tower_placer_.Place(simulator_.break_through(), money);
         }
@@ -124,6 +129,13 @@ class MazeDefender : public Strategy {
         }
         
         return {placed_towers.begin()+tower_count, placed_towers.end()};
+    }
+    
+private:
+
+    void CheckInRoutes(const vector<MazeBreakThrough>& break_through_) {
+        // check in path
+        routes_.CheckIn()
     }
         
 };
