@@ -26,6 +26,22 @@ class MazeSimulator {
         : hp(hp), id(id), pos(pos), prev(prev) {}
     };
     
+    struct Route {
+        Index base;
+        Index spawn;
+        
+        bool operator==(const Route& r) const {
+            return r.base == base && r.spawn == spawn;
+        }
+        
+        struct Hash {
+            
+            uint64_t operator()(const Route& r) const {
+                return ant::Hash(r.base, r.spawn);
+            }
+            
+        };
+    };
     
     double shadow_strength_;
     const Maze* maze_;
@@ -35,6 +51,10 @@ class MazeSimulator {
 
     vector<MazeBreakThrough> break_through_;
 
+    unordered_set<Route, Route::Hash> routes_;
+    // creep id to spawn index
+    unordered_map<Index, Index> creep_spawns_;
+    
 public:
     void Init(const Maze& maze, const TowerManager& tower_manager) {
         shadow_strength_ = 1.;
@@ -46,6 +66,11 @@ public:
         history_.clear();
         current_.clear();
         break_through_.clear();
+        creep_spawns_.clear();
+        
+        for (auto& c : creeps) {
+            creep_spawns_[c.id] = c.spawn;
+        }
         
         auto& b = tower_manager_->board(); 
         Init(creeps, prev_locs);
@@ -69,6 +94,9 @@ public:
                     s = history_[s.prev];
                 }
                 break_through_.emplace_back(h.hp, path);
+                
+                Route r{b.base(path.front()), creep_spawns_[h.id]};
+                routes_.insert(r);
             }
         }
     }

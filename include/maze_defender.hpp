@@ -103,8 +103,8 @@ class MazeDefender : public Strategy {
             cerr << "Warning! Not all creeps killed!";
         }
         
-        ++iteration;
-        if (iteration == TICK_COUNT) {
+        ++iteration_;
+        if (iteration_ == TICK_COUNT) {
             auto& b = *board_;
             Count N = b.size();
             for (auto& p : Region({N, N})) {
@@ -123,12 +123,6 @@ class MazeDefender : public Strategy {
             creep_prev_[c.id] = c;
         }
         
-        
-        ++iteration_;
-        if (iteration_ == 30) {
-            ofstream out("../output/maze.txt");
-            maze_.Print(out);
-        }
         return {placed_towers.begin()+tower_count, placed_towers.end()};
     }
         

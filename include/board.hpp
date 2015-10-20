@@ -70,7 +70,7 @@ public:
         }
     }
     
-    bool IsBaseNearby(const Position& t) {
+    bool IsBaseNearby(const Position& t) const {
         bool b = false;
         auto func = [&](const Position& p) {
             if (IsBase(p)) {
@@ -115,7 +115,7 @@ public:
         picture_[p] = CELL_TOWER;
     }
  
-    Index spawn(const Position& p) {
+    Index spawn(const Position& p) const {
         for (Index i = 0; i < spawn_locations_.size(); ++i) {
             if (spawn_locations_[i] == p) {
                 return i;

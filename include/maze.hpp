@@ -199,8 +199,6 @@ class Maze {
 
 
 public:
-
-    
     
     void Deduct(const Board& b) {
         Deductor(b, *this).Deduct();
@@ -298,16 +296,6 @@ public:
         out << endl << endl;
     }
 
-private:
-    
-    
-    
-    
-    void DeductFromSpawns(const Board& b) {
-        Path path;
-        
-    }
-    
 
 
 };
