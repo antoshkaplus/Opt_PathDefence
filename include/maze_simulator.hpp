@@ -26,22 +26,7 @@ class MazeSimulator {
         : hp(hp), id(id), pos(pos), prev(prev) {}
     };
     
-    struct Route {
-        Index base;
-        Index spawn;
-        
-        bool operator==(const Route& r) const {
-            return r.base == base && r.spawn == spawn;
-        }
-        
-        struct Hash {
-            
-            uint64_t operator()(const Route& r) const {
-                return ant::Hash(r.base, r.spawn);
-            }
-            
-        };
-    };
+
     
     double shadow_strength_;
     const Maze* maze_;
@@ -50,9 +35,6 @@ class MazeSimulator {
     vector<Shadow> current_;
 
     vector<MazeBreakThrough> break_through_;
-
-    unordered_set<Route, Route::Hash> routes_;
-    // creep id to spawn index
     unordered_map<Index, Index> creep_spawns_;
     
 public:
@@ -93,10 +75,9 @@ public:
                     }
                     s = history_[s.prev];
                 }
-                break_through_.emplace_back(h.hp, path);
-                
-                Route r{b.base(path.front()), creep_spawns_[h.id]};
-                routes_.insert(r);
+                // want base to be last element
+                reverse(path.begin(), path.end());
+                break_through_.emplace_back(h.id, h.hp, path);
             }
         }
     }

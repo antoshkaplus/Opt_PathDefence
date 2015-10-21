@@ -9,6 +9,7 @@
 #pragma once
 
 #include "tower_manager.hpp"
+#include "maze_routes.hpp"
 
 
 class MazeTowerPlacer {
@@ -40,14 +41,13 @@ class MazeTowerPlacer {
     };
 
 
+    const MazeRoutes* routes_; 
     TowerManager* tower_manager_; 
     Params params_;
     vector<double> tower_factors_;
 
-
 public:
     
-
     void Init(const Board& board, TowerManager& tower_manager) {
         tower_manager_ = &tower_manager;
         params_ = {1, 1};
@@ -99,6 +99,38 @@ public:
             mngr.PlaceTower(best);
             money -= ts[best.tower].cost;
         }
+    }
+    
+    // need heuristic for current run probably
+    void PlaceGlobally(const vector<MazeBreakThrough>& break_through, int& money) {
+        if (break_through.empty()) return;
+        
+        auto& mngr = *tower_manager_;
+        auto& ts = mngr.towers();
+        auto& rs = *routes_;
+        
+        Placement best;
+        best.score = 0;
+        
+        bool is_initialized = false;
+        auto op = [&](const TowerPosition& tp) {
+            if (ts[tp.tower].cost > money) {
+                return;
+            }
+            
+            Count score = rs.CountRoutes(mngr.tower_scope(tp).positions);
+            Placement pl{tp, score, *this};
+            if (!is_initialized || pl.IsBetterThan(best)) {
+                is_initialized = true;
+                best = pl;
+            }
+        };
+        mngr.ForEachOpenTowerPosition(op);
+        if (best.score > 0) {
+            mngr.PlaceTower(best);
+            money -= ts[best.tower].cost;
+        }
+
     }
 
     void set_params(Params& params) {

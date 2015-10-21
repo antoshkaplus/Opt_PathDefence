@@ -31,8 +31,8 @@ class MazeDefender : public Strategy {
     ofstream out_creep_count_; 
     
     Index iteration_;
-    map<Index, Creep> creep_prev_;
-    
+    unordered_map<Index, Creep> creeps_prev_;
+    unordered_map<Index, Creep> creeps_;
     
     public:
     int init(Board& board, 
@@ -60,9 +60,11 @@ class MazeDefender : public Strategy {
         
         auto N = board_->size(); 
         vector<Position> creep_prev_vec;
+        creeps_.clear();
         for (auto& c : creeps) {
-            auto it = creep_prev_.find(c.id);
-            if (it == creep_prev_.end()) {
+            creeps_[c.id] = c;
+            auto it = creeps_prev_.find(c.id);
+            if (it == creeps_prev_.end()) {
                 // just spawned
                 auto p = c.pos;
                 if (p.row == 0) {
@@ -80,11 +82,11 @@ class MazeDefender : public Strategy {
             auto p = it->second.pos;
             maze_.CheckIn(c.pos, p);
             creep_prev_vec.push_back(p);
-            creep_prev_.erase(it);
+            creeps_prev_.erase(it);
         }
         // now we have in creep_prev_ those who not with us anymore
         auto& b = *board_;
-        for (auto& p : creep_prev_) {
+        for (auto& p : creeps_prev_) {
             auto op = [&](const Position& n) {
                 if (b.IsBase(n)) {
                     maze_.CheckIn(n, p.second.pos);
@@ -123,19 +125,16 @@ class MazeDefender : public Strategy {
             out_crossroads_.close();
         }
         
-        creep_prev_.clear();
-        for (auto& c : creeps) {
-            creep_prev_[c.id] = c;
-        }
-        
+        creeps_ = creeps_prev_;
         return {placed_towers.begin()+tower_count, placed_towers.end()};
     }
     
 private:
 
     void CheckInRoutes(const vector<MazeBreakThrough>& break_through_) {
-        // check in path
-        routes_.CheckIn()
+        for (auto& bt : break_through_) {
+            routes_.CheckIn(creeps_[bt.id].spawn, bt.path);
+        }
     }
         
 };

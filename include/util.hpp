@@ -15,6 +15,7 @@
 #include <array>
 #include <queue>
 #include <unordered_map>
+#include <bitset>
 
 #include "ant/core/core.hpp"
 #include "ant/geometry/d2.hpp"
@@ -85,14 +86,31 @@ struct MazeBreakThrough {
     // first: where creep started, last: creep hits base
     Path path;
     Count hp;
+    // creep id that got through
     Index id;
     
     MazeBreakThrough() {}
     
-    MazeBreakThrough(Count hp, const Path& path) 
+    MazeBreakThrough(Index id, Count hp, const Path& path) 
     : path(path), hp(hp) {}
 };
 
+struct Route {
+    Index base;
+    Index spawn;
+    
+    bool operator==(const Route& r) const {
+        return r.base == base && r.spawn == spawn;
+    }
+    
+    struct Hash {
+        
+        uint64_t operator()(const Route& r) const {
+            return ant::Hash(r.base, r.spawn);
+        }
+        
+    };
+};
 
 constexpr Count MAX_CREEP_COUNT = 2000;
 constexpr Count TICK_COUNT = 2000;
