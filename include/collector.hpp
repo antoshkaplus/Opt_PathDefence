@@ -21,6 +21,7 @@ class Collector : public Strategy {
     Maze maze_;
     TowerManager tower_manager_;
     MazeSimulator simulator_;
+    MazeRoutes routes_;
     MazeTowerPlacer tower_placer_;
     
     const Board* board_;
@@ -41,7 +42,8 @@ public:
         iteration = 0;
         crossroads_.open(output_path + "crossroards.txt");
         tower_manager_.Init(board, towers);
-        tower_placer_.Init(board, tower_manager_);
+        routes_.Init(board);
+        tower_placer_.Init(board, tower_manager_, routes_);
         simulator_.Init(maze_, tower_manager_);
         return 1;
     }

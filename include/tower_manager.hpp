@@ -80,6 +80,10 @@ public:
         return placed_towers_;
     }
     
+    void PopPlacedTower() {
+        placed_towers_.pop_back();
+    }
+    
     const vector<Tower>& towers() const {
         return *towers_;
     } 

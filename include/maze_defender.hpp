@@ -46,7 +46,8 @@ class MazeDefender : public Strategy {
         out_crossroads_.open(output_path + "crossroards.txt");
         out_creep_count_.open(output_path + "creep_count.txt");
         tower_manager_.Init(board, towers);
-        tower_placer_.Init(board, tower_manager_);
+        routes_.Init(board);
+        tower_placer_.Init(board, tower_manager_, routes_);
         simulator_.Init(maze_, tower_manager_);
         maze_.Deduct(board);
         return 1;
@@ -100,11 +101,17 @@ class MazeDefender : public Strategy {
         Index iteration = 0;
         while (++iteration < 10) {
             simulator_.Simulate(creeps, creep_prev_vec);
+            auto bt = simulator_.break_through();
             if (iteration == 0) {
                 CheckInRoutes(simulator_.break_through());
             } 
             if (simulator_.break_through().empty()) break;
-            tower_placer_.Place(simulator_.break_through(), money);
+            // try out combined first and if not good enough after simulation use usual
+            tower_placer_.PlaceCombained(simulator_.break_through(), money);
+            simulator_.Simulate(creeps, creep_prev_vec);
+            if (simulator_.break_through().empty()) break;
+            tower_placer_.Revert(money);
+            tower_placer_.Place(bt, money);
         }
         if (!simulator_.break_through().empty()) {
             cerr << "Warning! Not all creeps killed!";
