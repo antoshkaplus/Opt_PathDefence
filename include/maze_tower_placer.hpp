@@ -47,6 +47,8 @@ class MazeTowerPlacer {
     Params params_;
     vector<double> tower_factors_;
 
+    bool tower_placed_ = false;
+
 public:
     
     void Init(const Board& board, TowerManager& tower_manager, const MazeRoutes& routes) {
@@ -58,6 +60,7 @@ public:
     }
 
     void Place(const vector<MazeBreakThrough>& break_through, int& money) {
+        tower_placed_ = false;
         if (break_through.empty()) return;
         
         CountMap<Position, UnorderedMap> bt_pos;
@@ -93,6 +96,7 @@ public:
         };
         mngr.ForEachOpenTowerPosition(op);
         if (best.score > 0) {
+            tower_placed_ = true;
             mngr.PlaceTower(best);
             money -= ts[best.tower].cost;
         }
@@ -100,6 +104,7 @@ public:
     
     // need heuristic for current run probably
     void PlaceGlobally(const vector<MazeBreakThrough>& break_through, int& money) {
+        tower_placed_ = false;
         if (break_through.empty()) return;
         
         auto& mngr = *tower_manager_;
@@ -123,6 +128,7 @@ public:
         };
         mngr.ForEachOpenTowerPosition(op);
         if (best.score > 0) {
+            tower_placed_ = true;
             mngr.PlaceTower(best);
             money -= ts[best.tower].cost;
         }
@@ -130,6 +136,7 @@ public:
     }
 
     void PlaceCombained(const vector<MazeBreakThrough>& break_through, int& money) {
+        tower_placed_ = false;
         if (break_through.empty()) return;
     
         auto& mngr = *tower_manager_;
@@ -157,6 +164,7 @@ public:
         
         mngr.ForEachOpenTowerPosition(op);
         if (best.score > 0) {
+            tower_placed_ = true;
             mngr.PlaceTower(best);
             money -= ts[best.tower].cost;
         } else {
@@ -166,9 +174,11 @@ public:
     }
 
     void Revert(int& money) {
+        if (!tower_placed_) return;
+        tower_placed_ = false;
         auto& mngr = *tower_manager_;
         auto& ts = mngr.towers();
-        if (mngr.placed_towers().empty()) return;
+        assert(!mngr.placed_towers().empty());
         money += ts[mngr.placed_towers().back().tower].cost;
         mngr.PopPlacedTower();
     }

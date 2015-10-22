@@ -99,19 +99,23 @@ class MazeDefender : public Strategy {
         auto& placed_towers = tower_manager_.placed_towers();
         Count tower_count = placed_towers.size();
         Index iteration = 0;
+        // should think about it more
         while (++iteration < 10) {
+            auto& bt = simulator_.break_through();
             simulator_.Simulate(creeps, creep_prev_vec);
-            auto bt = simulator_.break_through();
             if (iteration == 0) {
-                CheckInRoutes(simulator_.break_through());
+                CheckInRoutes(bt);
             } 
-            if (simulator_.break_through().empty()) break;
+            if (bt.empty()) break;
             // try out combined first and if not good enough after simulation use usual
-            tower_placer_.PlaceCombained(simulator_.break_through(), money);
+            if (time(NULL) % 2 == 0) 
+                tower_placer_.PlaceCombained(simulator_.break_through(), money);
+            else 
+                tower_placer_.Place(bt, money); 
             simulator_.Simulate(creeps, creep_prev_vec);
-            if (simulator_.break_through().empty()) break;
-            tower_placer_.Revert(money);
-            tower_placer_.Place(bt, money);
+            if (bt.empty()) break;
+            //tower_placer_.Revert(money);
+            
         }
         if (!simulator_.break_through().empty()) {
             cerr << "Warning! Not all creeps killed!";
@@ -132,7 +136,7 @@ class MazeDefender : public Strategy {
             out_crossroads_.close();
         }
         
-        creeps_ = creeps_prev_;
+        creeps_prev_ = creeps_;
         return {placed_towers.begin()+tower_count, placed_towers.end()};
     }
     

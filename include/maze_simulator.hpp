@@ -59,6 +59,7 @@ public:
         Index iteration = 0;
         Count sz = b.size();
         // one of the condition is against looping shadows
+        // it happens because not all directions available at start
         while (!current_.empty() && ++iteration != 3*sz) {
             MoveShadows();
             ShootTowers();

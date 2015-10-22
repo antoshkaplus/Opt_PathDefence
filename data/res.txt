@@ -23,6 +23,7 @@ top coder test
 75.0
 
 maze deduction
+ec99dc5ca976302795ae41686a6fe7064abcfc7e
 4700
 19096
 11358
