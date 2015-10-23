@@ -31,3 +31,7 @@ ideas:
     pick overall (better for overall board)
     best instead of best for current
     iteration if we are able to kill current creeps anyway
+
+* coverage is a good idea but scoring should be different some how
+    we need to include coverage with some special function
+    so it won't participate sometimes

@@ -88,6 +88,10 @@ public:
         return *towers_;
     } 
     
+    const Tower& tower(Index index) const {
+        return (*towers_)[index];
+    }
+    
     const vector<Position> open_tower_positions() const {
         return open_tower_positions_;
     }

@@ -103,14 +103,14 @@ class MazeDefender : public Strategy {
         while (++iteration < 10) {
             auto& bt = simulator_.break_through();
             simulator_.Simulate(creeps, creep_prev_vec);
-            if (iteration == 0) {
+            if (iteration == 1) {
                 CheckInRoutes(bt);
             } 
             if (bt.empty()) break;
             // try out combined first and if not good enough after simulation use usual
-            if (time(NULL) % 2 == 0) 
-                tower_placer_.PlaceCombained(simulator_.break_through(), money);
-            else 
+            //if (time(NULL) % 2 == 0) 
+            //    tower_placer_.PlaceCombained(simulator_.break_through(), money);
+            //else 
                 tower_placer_.Place(bt, money); 
             simulator_.Simulate(creeps, creep_prev_vec);
             if (bt.empty()) break;

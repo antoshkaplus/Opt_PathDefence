@@ -10,6 +10,7 @@
 
 #include "tower_manager.hpp"
 #include "maze_routes.hpp"
+#include "maze_coverage.hpp"
 
 
 class MazeTowerPlacer {
@@ -172,6 +173,47 @@ public:
         }
         
     }
+    
+    
+    void PlaceCombained_2(const vector<MazeBreakThrough>& break_through, int& money) {
+        tower_placed_ = false;
+        if (break_through.empty()) return;
+        
+        auto& mngr = *tower_manager_;
+        auto& ts = mngr.towers();
+        
+        Placement<double> best;
+        best.score = 0;
+        
+        bool is_initialized = false;
+        Index index = 0;
+        vector<double> cur_scores = ComputeCurrentScores(break_through, money);
+        vector<double> route_scores = ComputeRouteScores_2(break_through, money);
+        auto op = [&](const TowerPosition& tp) {
+            if (ts[tp.tower].cost > money) {
+                return;
+            }
+            double score = cur_scores[index] + route_scores[index]/5 + 100000; 
+            Placement<double> pl{tp, score, *this};
+            if (!is_initialized || pl.IsBetterThan(best)) {
+                is_initialized = true;
+                best = pl;
+            }
+            ++index;
+        };
+        
+        mngr.ForEachOpenTowerPosition(op);
+        if (best.score > 0) {
+            tower_placed_ = true;
+            mngr.PlaceTower(best);
+            money -= ts[best.tower].cost;
+        } else {
+            //assert(false);
+        }
+        
+    }
+    
+
 
     void Revert(int& money) {
         if (!tower_placed_) return;
@@ -242,6 +284,39 @@ private:
         return scores;
     }
     
+    
+    vector<double> ComputeRouteScores_2(const vector<MazeBreakThrough>& break_through, int& money) {
+        auto& mngr = *tower_manager_;
+        auto& rs = *routes_;
+        auto& ts = mngr.towers();
+        
+        MazeCoverage cov;
+        cov.Init(mngr.board(), mngr, rs);
+        cov.Compute();
+        vector<double> scores;
+        
+        auto op = [&](const TowerPosition& tp) {
+            scores.push_back(0);
+            if (ts[tp.tower].cost > money) {
+                return;
+            }
+            auto v = cov.Coverage(tp);
+            if (v.empty()) return;
+            scores.back() = *min_element(v.begin(), v.end()) - *max_element(v.begin(), v.end());
+//            
+//            double ss = std::numeric_limits<double>::max();
+//            for (auto s : v) {
+//                if (s < ss && s != 0) {
+//                    ss = s;  
+//                } 
+//            }
+//            if (ss == std::numeric_limits<double>::max()) return;
+//            scores.back() = ss; 
+        };
+        mngr.ForEachOpenTowerPosition(op);
+        return scores;
+    }
+
 
 
     void ComputeTowerFactors() {

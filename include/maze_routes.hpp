@@ -57,6 +57,23 @@ public:
         return set.count();
     }
     
+    Count total_count() const {
+        return route_set_.size();
+    }
+    
+    const Route& route(Index route_index) const {
+        return route_set_[route_index];
+    } 
+    
+    bool in_route(const Position& p, Index route_index) const {
+        auto it = routes_.find(p);
+        if (it == routes_.end()) {
+            return false;
+        }
+        return it->second.test(route_index);
+    }
+    
+    
 private:
     
     Index route_index(Route r) {
