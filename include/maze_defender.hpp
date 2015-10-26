@@ -29,6 +29,7 @@ class MazeDefender : public Strategy {
     
     ofstream out_crossroads_;
     ofstream out_creep_count_; 
+    ofstream out_deduction_;
     
     Index iteration_;
     unordered_map<Index, Creep> creeps_prev_;
@@ -45,11 +46,13 @@ class MazeDefender : public Strategy {
         iteration_ = 0;
         out_crossroads_.open(output_path + "crossroards.txt");
         out_creep_count_.open(output_path + "creep_count.txt");
+        out_deduction_.open(output_path + "deduction.txt");
         tower_manager_.Init(board, towers);
         routes_.Init(board);
         tower_placer_.Init(board, tower_manager_, routes_);
         simulator_.Init(maze_, tower_manager_);
         maze_.Deduct(board);
+        maze_.Print(out_deduction_);
         return 1;
     }
     
@@ -101,21 +104,23 @@ class MazeDefender : public Strategy {
         Index iteration = 0;
         // should think about it more
         while (++iteration < 10) {
-            auto& bt = simulator_.break_through();
+            auto& bt = simulator_.break_through(); 
             simulator_.Simulate(creeps, creep_prev_vec);
-            if (iteration == 1) {
+            auto dmg_before = simulator_.total_dmg();
+            if (iteration == 1 && !bt.empty()) {
                 CheckInRoutes(bt);
             } 
             if (bt.empty()) break;
-            // try out combined first and if not good enough after simulation use usual
-            //if (time(NULL) % 2 == 0) 
-            //    tower_placer_.PlaceCombained(simulator_.break_through(), money);
-            //else 
-                tower_placer_.Place(bt, money); 
+            auto bbt = bt;
+            for (auto& b : bbt) {
+                b.id = creeps_[b.id].spawn;
+            }
+            tower_placer_.PlaceMoreCoverage(bbt, money); 
             simulator_.Simulate(creeps, creep_prev_vec);
-            if (bt.empty()) break;
-            //tower_placer_.Revert(money);
-            
+            if (simulator_.total_dmg() == dmg_before) {
+                tower_placer_.Revert(money);
+                tower_placer_.Place(bt, money);
+            }
         }
         if (!simulator_.break_through().empty()) {
             cerr << "Warning! Not all creeps killed!";

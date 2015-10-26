@@ -213,6 +213,54 @@ public:
         
     }
     
+    
+    void PlaceMoreCoverage(const vector<MazeBreakThrough>& break_through, int& money) {
+        tower_placed_ = false;
+        if (break_through.empty()) return;
+        
+        auto& mngr = *tower_manager_;
+        auto& rs = *routes_;
+        auto& ts = mngr.towers();
+        
+        MazeCoverage cov;
+        cov.Init(mngr.board(), mngr, rs);
+        cov.Compute();
+             
+        Placement<double> best;
+        best.score = 0;
+        
+        Index t_ind = max_element(tower_factors_.begin(), tower_factors_.end())  - tower_factors_.begin();
+        
+        auto bt_cov = cov.NeededCoverage(break_through);
+        
+        bool is_initialized = false;
+        auto op = [&](const Position& p) {
+            if (ts[t_ind].cost > money) {
+                return;
+            }
+            double score = 0;
+            auto t_cov = cov.CoverageOfTower({t_ind, p});
+            for (auto i = 0; i < t_cov.size(); ++i) {
+                if (bt_cov[i] != 0) {
+                    score += t_cov[i]; 
+                }
+            }
+            
+            Placement<double> pl{{t_ind, p}, score, *this};
+            if (!is_initialized || pl.IsBetterThan(best)) {
+                is_initialized = true;
+                best = pl;
+            }
+        };
+        mngr.ForEachOpenPosition(op);
+        if (best.score > 0) {
+            tower_placed_ = true;
+            mngr.PlaceTower(best);
+            money -= ts[best.tower].cost;
+        }
+    }
+    
+    
 
 
     void Revert(int& money) {

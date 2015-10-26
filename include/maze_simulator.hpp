@@ -69,13 +69,17 @@ public:
                 // should make history
                 Path path;
                 auto s = h;
+                assert(s.prev != -1);
                 while (true) {
-                    path.push_back(s.pos);
                     if (s.prev == -1) {
                         break;
                     }
+                    assert(b.IsInside(s.pos));
+                    path.push_back(s.pos);
                     s = history_[s.prev];
                 }
+                // imposible to place good tower
+                if (path.size() == 1) continue;
                 // want base to be last element
                 reverse(path.begin(), path.end());
                 break_through_.emplace_back(h.id, h.hp, path);
@@ -87,7 +91,13 @@ public:
         return break_through_;
     }
     
-    
+    Count total_dmg() const {
+        Count dmg = 0;
+        for (auto& b : break_through_) {
+            dmg += b.hp;
+        }
+        return dmg;
+    }
     
 private:
     void Init(const vector<Creep>& creeps, const vector<Position>& prev_locs) {
@@ -125,8 +135,8 @@ private:
             }
         }
         history_.insert(history_.end(), current_.begin(), current_.end());
-        auto rem_start = remove_if(next.begin(), next.end(), [&](const Shadow& s) {
-            return b.IsBase(s.pos);
+        auto rem_start = partition(next.begin(), next.end(), [&](const Shadow& s) {
+            return !b.IsBase(s.pos);
         });
         history_.insert(history_.end(), rem_start, next.end());
         current_.assign(next.begin(), rem_start);

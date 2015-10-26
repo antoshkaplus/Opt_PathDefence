@@ -35,3 +35,6 @@ ideas:
 * coverage is a good idea but scoring should be different some how
     we need to include coverage with some special function
     so it won't participate sometimes
+
+* need to connect global and current coverage.. get most out of it
+    involves simulations for future

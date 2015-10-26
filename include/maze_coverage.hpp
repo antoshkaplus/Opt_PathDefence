@@ -68,7 +68,7 @@ public:
         }
     }
 
-    vector<double> Coverage(const TowerPosition& tp) {
+    vector<double> Coverage(const TowerPosition& tp) const {
         auto ws = ComputeForTower(tp);
         for (auto i = 0; i < ws.size(); ++i) {
             ws[i] += weights_[i];
@@ -76,9 +76,29 @@ public:
         }
         return ws;
     }
+    
+    vector<double> CoverageOfTower(const TowerPosition& tp) const {
+        auto ws = ComputeForTower(tp);
+        // don't add up weights
+        for (auto i = 0; i < ws.size(); ++i) {
+            ws[i] *= factors_[i];
+        }
+        return ws;
+    }
 
+    vector<double> NeededCoverage(const vector<MazeBreakThrough>& bt) const {
+        auto& rs = *routes_;
+        auto r_count = rs.total_count();
+        vector<double> cov(r_count, 0);
+        for (auto& b : bt) {
+            auto i = rs.route_index( b.id, b.path.back());
+            cov[i] += b.hp;
+        }
+        return cov;
+    }
+    
 private:
-    vector<double> ComputeForTower(const TowerPosition& tp) {
+    vector<double> ComputeForTower(const TowerPosition& tp) const {
         auto& mngr = *mngr_;
         auto& rs = *routes_; 
         auto r_count = rs.total_count();
@@ -88,9 +108,9 @@ private:
                 ws[r] += (rs.in_route(p, r) ? 1 : 0);
             }
         }
-        auto cost = mngr.tower(tp.tower).cost;
+        auto dmg = mngr.tower(tp.tower).dmg;
         for (auto r = 0; r < r_count; ++r) {
-            ws[r] =  cost * log(ws[r]);
+            ws[r] = dmg * log(ws[r]);
         }
         return ws;
     }

@@ -92,7 +92,7 @@ struct MazeBreakThrough {
     MazeBreakThrough() {}
     
     MazeBreakThrough(Index id, Count hp, const Path& path) 
-    : path(path), hp(hp) {}
+    : path(path), hp(hp), id(id) {}
 };
 
 struct Route {
@@ -112,6 +112,7 @@ struct Route {
     };
 };
 
+constexpr Count LAST_CREEP_LEVEL_TICK = 1500;
 constexpr Count MAX_CREEP_COUNT = 2000;
 constexpr Count TICK_COUNT = 2000;
 constexpr Count HP_INCREASE_PERIOD = 500;
@@ -132,6 +133,7 @@ constexpr char CELL_BASE = 'b';
 
 
 extern const string output_path;
+extern Index CURRENT_TICK;
 
 vector<double> ComputeCoverage(const TowerManager& b, const TowerPosition& tp);
 

@@ -89,6 +89,7 @@ public:
         for (auto& c : creeps) {
             ++creep_alive_ticks[c.id];
         }
+        ++CURRENT_TICK;
         return res;
     }
     

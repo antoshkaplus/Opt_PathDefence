@@ -94,10 +94,18 @@ Picture p_4 = {
  5,4 => 4,4
  */
 
-
+Picture p_5 = {
+    "....###",
+    "###.###",
+    "..#.###",
+    "#.#.###",
+    "..#.###",
+    "#...###",
+    "###0###"
+};
 
 TEST(Maze, MazeDeduction) {
-    vector<Picture> ps = {p_0, p_1, p_2, p_3, p_4};
+    vector<Picture> ps = {p_0, p_1, p_2, p_3, p_4, p_5};
     for (auto& p : ps) {
         cout << "picture:" << endl;
         Board b{p};

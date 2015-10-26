@@ -81,6 +81,7 @@ public:
     }
     
     void PopPlacedTower() {
+        open_tower_positions_.push_back(placed_towers_.back().position);
         placed_towers_.pop_back();
     }
     
@@ -112,6 +113,13 @@ public:
             for (auto t_ind = 0; t_ind < towers().size(); ++t_ind) {
                 op(TowerPosition{t_ind, p});
             }
+        }
+    }
+    
+    template<class Operation>
+    void ForEachOpenPosition(Operation& op) {
+        for (auto p : open_tower_positions()) {
+            op(p);
         }
     }
     

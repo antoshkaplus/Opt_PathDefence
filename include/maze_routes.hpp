@@ -19,7 +19,6 @@ class MazeRoutes {
     using RouteSet = bitset<MAX_ROUTE_COUNT>; 
 
     
-
     vector<Route> route_set_;
 
     unordered_map<Position, RouteSet> routes_;
@@ -45,6 +44,11 @@ public:
             }
             set_route(it->second, r_index);
         }
+    }
+    
+    Index route_index(Index spawn, const Position& base) const {
+        Route r{board_->base(base), spawn};
+        return route_index(r);
     }
     
     Count CountRoutes(const vector<Position>& ps) const {
@@ -76,14 +80,23 @@ public:
     
 private:
     
-    Index route_index(Route r) {
+    Index route_index(Route r) const {
         for (Index i = 0; i < route_set_.size(); ++i) {
             if (route_set_[i] == r) {
                 return i;
             }
         }
-        route_set_.push_back(r);
-        return route_set_.size()-1;
+        return -1;
+    }
+    
+    Index route_index(Route r) {
+        const auto& s = *this;
+        Index res = s.route_index(r);
+        if (res == -1) {
+            res = route_set_.size();
+            route_set_.push_back(r);
+        }
+        return res;
     }
     
     void set_route(RouteSet& set, Index route_index) {

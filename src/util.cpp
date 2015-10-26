@@ -14,6 +14,7 @@
 //vector<double> coverage;
 
 const string output_path = "../output/";
+Index CURRENT_TICK = 0;
 
 struct Score {
     double min;
