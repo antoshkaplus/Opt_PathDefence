@@ -115,12 +115,15 @@ class MazeDefender : public Strategy {
             for (auto& b : bbt) {
                 b.id = creeps_[b.id].spawn;
             }
-            tower_placer_.PlaceMoreCoverage(bbt, money); 
-            simulator_.Simulate(creeps, creep_prev_vec);
-            if (simulator_.total_dmg() == dmg_before) {
-                tower_placer_.Revert(money);
-                tower_placer_.Place(bt, money);
-            }
+            tower_placer_.Place(bt, money);
+            
+//            
+//            tower_placer_.PlaceMoreCoverage(bbt, money); 
+//            simulator_.Simulate(creeps, creep_prev_vec);
+//            if (simulator_.total_dmg() == dmg_before) {
+//                tower_placer_.Revert(money);
+//                tower_placer_.Place(bt, money);
+//            }
         }
         if (!simulator_.break_through().empty()) {
             cerr << "Warning! Not all creeps killed!";

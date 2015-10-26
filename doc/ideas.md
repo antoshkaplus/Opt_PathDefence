@@ -38,3 +38,6 @@ ideas:
 
 * need to connect global and current coverage.. get most out of it
     involves simulations for future
+
+* big idea didn't work out. greedy is better.
+    there is a bug, be careful

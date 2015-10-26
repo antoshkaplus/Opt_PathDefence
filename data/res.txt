@@ -22,7 +22,7 @@ top coder test
 7803.0
 75.0
 
-maze deduction
+maze coverage
 4683
 19234
 11336
@@ -33,3 +33,15 @@ maze deduction
 34131
 7923
 44
+
+maze deduction greedy
+4617
+19445
+11504
+9422
+4440
+7438
+8191
+34091
+7911
+55
