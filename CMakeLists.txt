@@ -71,3 +71,11 @@ endif()
 
 add_executable(path_defence_test "./app/test.cpp")
 target_link_libraries(path_defence_test path_defence ${GTEST_LIB} )
+
+# cool solutions
+add_executable(romka "./app/romka.cpp")
+add_executable(nika "./app/nika.cpp")
+
+
+
+
