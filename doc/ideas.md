@@ -39,6 +39,9 @@ ideas:
 * need to connect global and current coverage.. get most out of it
     involves simulations for future
 
+* big idea didn't work out. greedy is better.
+    there is a bug, be careful
+
 MORE GOOD IDEAS
 
 * swap origins after some time and try run with those creeps again (see how good defence is)
